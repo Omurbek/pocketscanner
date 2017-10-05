@@ -144,19 +144,24 @@ public class CameraActivity extends AppCompatActivity {
             return;
         }
 
-        try {
-            FileOutputStream fos = this.openFileOutput("image.jpg", Context.MODE_PRIVATE);
-            image.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.close();
-            image.recycle();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String tempFilename = "image.jpg";
+        saveBitmapToDisk(image, tempFilename);
+        image.recycle();
 
         Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
         intent.putParcelableArrayListExtra("corners", corners);
-        intent.putExtra("bitmap", "image.jpg");
+        intent.putExtra("bitmap", tempFilename);
         startActivity(intent);
+    }
+
+    private void saveBitmapToDisk(Bitmap bitmap, String filename) {
+        try {
+            FileOutputStream fos = this.openFileOutput("image.jpg", Context.MODE_PRIVATE);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     private void onFinish() {

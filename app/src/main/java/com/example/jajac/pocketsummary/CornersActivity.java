@@ -2,15 +2,10 @@ package com.example.jajac.pocketsummary;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.AsyncTask;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -21,18 +16,16 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 public class CornersActivity extends AppCompatActivity {
 
     private static final String TAG = "CornersActivity";
 
-    private ImageView mImage;
+    private ImageView mImageView;
+    private CornersView mCornersView;
 
     private Bitmap mBitmap;
     private ArrayList<Point> mCorners;
@@ -46,17 +39,19 @@ public class CornersActivity extends AppCompatActivity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
-        mImage = findViewById(R.id.activity_corners_img);
+        mImageView = findViewById(R.id.activity_corners_img);
+        mCornersView = findViewById(R.id.activity_corners_corners_container);
 
         mCorners = getIntent().getParcelableArrayListExtra("corners");
-        loadBitmap();
-        mImage.setImageBitmap(mBitmap);
+        sortCorners();
+        loadBitmapFromDisk();
+        mImageView.setImageBitmap(mBitmap);
 
         CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmap, mCorners);
         task.execute();
     }
 
-    private void loadBitmap() {
+    private void loadBitmapFromDisk() {
         try {
             String filename = getIntent().getStringExtra("bitmap");
             FileInputStream fis = this.openFileInput(filename);
@@ -66,6 +61,20 @@ public class CornersActivity extends AppCompatActivity {
             fis.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void sortCorners() {
+        Collections.sort(mCorners, (left, right) -> Integer.compare(left.y, right.y));
+        if (mCorners.get(0).x > mCorners.get(1).x) {
+            Point temp = mCorners.get(0);
+            mCorners.set(0, mCorners.get(1));
+            mCorners.set(1, temp);
+        }
+        if (mCorners.get(2).x < mCorners.get(3).x) {
+            Point temp = mCorners.get(2);
+            mCorners.set(2, mCorners.get(3));
+            mCorners.set(3, temp);
         }
     }
 
@@ -96,7 +105,6 @@ public class CornersActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(Void... voids) {
-            sortCorners();
             Point topLeft = corners.get(0);
             Point topRight = corners.get(1);
             Point bottomRight = corners.get(2);
@@ -141,21 +149,9 @@ public class CornersActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            mImage.setImageBitmap(bitmap);
-        }
-
-        private void sortCorners() {
-            Collections.sort(corners, (left, right) -> Integer.compare(left.y, right.y));
-            if (corners.get(0).x > corners.get(1).x) {
-                Point temp = corners.get(0);
-                corners.set(0, corners.get(1));
-                corners.set(1, temp);
-            }
-            if (corners.get(2).x < corners.get(3).x) {
-                Point temp = corners.get(2);
-                corners.set(2, corners.get(3));
-                corners.set(3, temp);
-            }
+//            mImageView.setImageBitmap(bitmap);
+            mCornersView.setPoints(mCorners);
+            mCornersView.setVisibility(View.VISIBLE);
         }
 
         private MatOfPoint2f getMatOfPoints(List<Point> points) {
