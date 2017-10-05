@@ -25,6 +25,7 @@ public class CornersActivity extends AppCompatActivity {
 
     private static final String TAG = "CornersActivity";
 
+    private boolean mProcessed;
     private ImageView mImageView;
     private CornersView mCornersView;
     private FloatingActionButton mBackBtn;
@@ -87,8 +88,10 @@ public class CornersActivity extends AppCompatActivity {
     }
 
     private void onLayoutDrawn() {
-        mCornersView.setPoints(mCorners);
-        mCornersView.setVisibility(View.VISIBLE);
+        if (!mProcessed) {
+            mCornersView.setPoints(mCorners);
+            mCornersView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void onBack() {
@@ -141,6 +144,7 @@ public class CornersActivity extends AppCompatActivity {
             transformedCorners.add(new Point(0, maxHeight - 1));
 
             Mat imageMat = new Mat();
+            Mat grayMat = new Mat();
             Mat imageRect = getMatOfPoints(corners);
             Mat transformRect = getMatOfPoints(transformedCorners);
             Utils.bitmapToMat(image, imageMat);
@@ -148,9 +152,15 @@ public class CornersActivity extends AppCompatActivity {
             Mat transformMat = Imgproc.getPerspectiveTransform(imageRect, transformRect);
             Imgproc.warpPerspective(imageMat, imageMat, transformMat, new Size(maxWidth, maxHeight));
 
+            Imgproc.cvtColor(imageMat, grayMat, Imgproc.COLOR_RGBA2GRAY);
+//            Imgproc.adaptiveThreshold(grayMat, grayMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C,
+//                    Imgproc.THRESH_BINARY, 3, 10);
+            Imgproc.threshold(grayMat, grayMat, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
             image = Bitmap.createBitmap(imageMat.width(), imageMat.height(), image.getConfig());
 
-            Utils.matToBitmap(imageMat, image);
+//            Utils.matToBitmap(imageMat, image);
+            Utils.matToBitmap(grayMat, image);
 
             imageRect.release();
             transformRect.release();
@@ -163,6 +173,7 @@ public class CornersActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
+            mProcessed = true;
             mCornersView.setVisibility(View.INVISIBLE);
             mImageView.setImageBitmap(bitmap);
         }

@@ -181,9 +181,9 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private Size getPhotoSize(Collection<Size> sizes) {
-        int twoMegapixels = 2 * 1024 * 1024;
+        int maxSize = 2 * 1024 * 1024;
         double ratio = 16.0 / 9.0;
-        sizes.removeIf(size -> size.width * size.height > twoMegapixels);
+        sizes.removeIf(size -> size.width * size.height > maxSize);
         sizes.removeIf(size -> Math.max(size.width, size.height) / Math.min(size.width, size.height) - ratio > 0.05);
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));
     }
