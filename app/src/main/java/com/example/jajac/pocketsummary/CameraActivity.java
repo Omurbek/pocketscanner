@@ -166,7 +166,7 @@ public class CameraActivity extends AppCompatActivity {
     private Size getPreviewSize(Collection<Size> sizes) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        // inverse width and height because camera sensor's default orientation
+        // swap width and height because camera sensor's default orientation
         // is landscape and we prefer portrait mode in this case
         Size screenSize = new Size(displayMetrics.heightPixels, displayMetrics.widthPixels);
         if (sizes.contains(screenSize)) {
