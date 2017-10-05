@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_corners_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.jajac.pocketsummary.CornersActivity">
@@ -16,5 +18,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/activity_corners_back_btn"
+        android:layout_width="@dimen/fab_small_size"
+        android:layout_height="@dimen/fab_small_size"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_gravity="bottom|start"
+        app:backgroundTint="@color/colorPrimary"
+        app:borderWidth="0dp"
+        android:elevation="6dp"
+        android:tint="@android:color/white"
+        android:clickable="true"
+        android:src="@drawable/ic_arrow_back_24dp"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/activity_corners_finish_btn"
+        android:layout_width="@dimen/fab_small_size"
+        android:layout_height="@dimen/fab_small_size"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_gravity="bottom|end"
+        app:backgroundTint="@color/colorPrimary"
+        app:borderWidth="0dp"
+        android:elevation="6dp"
+        android:tint="@android:color/white"
+        android:clickable="true"
+        android:src="@drawable/ic_check_24dp"/>
 
 </FrameLayout>

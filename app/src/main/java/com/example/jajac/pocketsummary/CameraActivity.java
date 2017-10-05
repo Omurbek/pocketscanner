@@ -156,7 +156,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private void saveBitmapToDisk(Bitmap bitmap, String filename) {
         try {
-            FileOutputStream fos = this.openFileOutput("image.jpg", Context.MODE_PRIVATE);
+            FileOutputStream fos = this.openFileOutput(filename, Context.MODE_PRIVATE);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
         } catch (Exception e) {

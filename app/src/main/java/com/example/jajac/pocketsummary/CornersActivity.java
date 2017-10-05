@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -26,14 +27,19 @@ public class CornersActivity extends AppCompatActivity {
 
     private ImageView mImageView;
     private CornersView mCornersView;
+    private FloatingActionButton mBackBtn;
+    private FloatingActionButton mFinishBtn;
 
     private Bitmap mBitmap;
-    private ArrayList<Point> mCorners;
+    private List<Point> mCorners;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_corners);
+
+        findViewById(R.id.activity_corners_container)
+                .getViewTreeObserver().addOnGlobalLayoutListener(() -> onLayoutDrawn());
 
         // Draw this activity full screen, ignoring the status bar (draw below it)
         getWindow().getDecorView().setSystemUiVisibility(
@@ -41,14 +47,16 @@ public class CornersActivity extends AppCompatActivity {
 
         mImageView = findViewById(R.id.activity_corners_img);
         mCornersView = findViewById(R.id.activity_corners_corners_container);
+        mBackBtn = findViewById(R.id.activity_corners_back_btn);
+        mFinishBtn = findViewById(R.id.activity_corners_finish_btn);
 
         mCorners = getIntent().getParcelableArrayListExtra("corners");
         sortCorners();
         loadBitmapFromDisk();
         mImageView.setImageBitmap(mBitmap);
 
-        CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmap, mCorners);
-        task.execute();
+        mBackBtn.setOnClickListener(view -> onBack());
+        mFinishBtn.setOnClickListener(view -> onFinish());
     }
 
     private void loadBitmapFromDisk() {
@@ -78,15 +86,21 @@ public class CornersActivity extends AppCompatActivity {
         }
     }
 
-//    private void drawCorners() {
-//        Canvas c = new Canvas(mBitmap);
-//        Paint p = new Paint();
-//        p.setColor(Color.RED);
-//
-//        for (Point point : mCorners) {
-//            c.drawCircle(point.x, point.y, 15, p);
-//        }
-//    }
+    private void onLayoutDrawn() {
+        mCornersView.setPoints(mCorners);
+        mCornersView.setVisibility(View.VISIBLE);
+    }
+
+    private void onBack() {
+        mBitmap.recycle();
+        onBackPressed();
+    }
+
+    private void onFinish() {
+        mCorners = mCornersView.getPoints();
+        CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmap, mCorners);
+        task.execute();
+    }
 
     public class CropTransformBinarizeTask extends AsyncTask<Void, Bitmap, Bitmap> {
 
@@ -149,9 +163,8 @@ public class CornersActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-//            mImageView.setImageBitmap(bitmap);
-            mCornersView.setPoints(mCorners);
-            mCornersView.setVisibility(View.VISIBLE);
+            mCornersView.setVisibility(View.INVISIBLE);
+            mImageView.setImageBitmap(bitmap);
         }
 
         private MatOfPoint2f getMatOfPoints(List<Point> points) {

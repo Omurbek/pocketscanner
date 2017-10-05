@@ -83,11 +83,12 @@ public class CornersView extends FrameLayout {
 
     public List<Point> getPoints() {
         List<Point> points = new ArrayList<>();
-        points.add(new Point((int) topLeft.getX(), (int) topLeft.getY()));
-        points.add(new Point((int) topRight.getX(), (int) topRight.getY()));
-        points.add(new Point((int) bottomRight.getX(), (int) bottomRight.getY()));
-        points.add(new Point((int) bottomLeft.getX(), (int) bottomLeft.getY()));
-        return getPoints();
+        float offset = topLeft.getWidth() / 2;
+        points.add(new Point((int) (topLeft.getX() + offset), (int) (topLeft.getY() + offset)));
+        points.add(new Point((int) (topRight.getX() + offset), (int) (topRight.getY() + offset)));
+        points.add(new Point((int) (bottomRight.getX() + offset), (int) (bottomRight.getY() + offset)));
+        points.add(new Point((int) (bottomLeft.getX() + offset), (int) (bottomLeft.getY() + offset)));
+        return points;
     }
 
     public void setPoints(List<Point> points) {
