@@ -1,40 +1,19 @@
 package com.example.jajac.pocketsummary;
 
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.Point;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.OrientationHelper;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import io.fotoapparat.Fotoapparat;
 import io.fotoapparat.parameter.ScaleType;
 import io.fotoapparat.parameter.Size;
-import io.fotoapparat.parameter.selector.SelectorFunction;
-import io.fotoapparat.parameter.selector.SizeSelectors;
-import io.fotoapparat.photo.BitmapPhoto;
-import io.fotoapparat.result.PendingResult;
 import io.fotoapparat.result.PhotoResult;
 import io.fotoapparat.view.CameraView;
 
@@ -58,7 +37,7 @@ public class CameraActivity extends AppCompatActivity {
     private FloatingActionButton mFinishBtn;
 
     private Fotoapparat mFotoapparat;
-    private DocumentFinder mDocumentFinder;
+    private BitmapsHolder mBitmapsHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +50,9 @@ public class CameraActivity extends AppCompatActivity {
         mFinishBtn = findViewById(R.id.activity_camera_finish_btn);
 
         mFotoapparat = Fotoapparat.with(this).into(mCameraView)
-                .previewScaleType(ScaleType.CENTER_CROP)
-                .previewSize(this::getPreviewSize)
-                .photoSize(this::getPhotoSize)
+                .previewScaleType(ScaleType.CENTER_INSIDE)
+                .previewSize(biggestSize())
+                .photoSize(biggestSize())
                 .lensPosition(back())
                 .focusMode(firstAvailable(
                         continuousFocus(),
@@ -86,7 +65,7 @@ public class CameraActivity extends AppCompatActivity {
                         torch()
                 )).build();
 
-        mDocumentFinder = new DocumentFinder(5, 0.04, true);
+        mBitmapsHolder = BitmapsHolder.getInstance();
 
         mBackBtn.setOnClickListener(view -> onBack());
         mCaptureBtn.setOnClickListener(view -> onCapture());
@@ -110,58 +89,14 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void onCapture() {
-        boolean isOrientationPortrait = getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_PORTRAIT;
         PhotoResult photoResult = mFotoapparat.takePicture();
-
-        ProgressDialog progressDialog = new ProgressDialog(CameraActivity.this);
-        progressDialog.setMessage("Processing...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
-
         photoResult
                 .toBitmap()
                 .whenAvailable(result -> {
-                    Bitmap capturedBitmap = result.bitmap;
-                    if (isOrientationPortrait) {
-                        capturedBitmap = getRotatedBitmap(result.bitmap);
-                    }
-                    processImage(capturedBitmap);
-                    progressDialog.dismiss();
+                    mBitmapsHolder.addBitmap(result.bitmap);
+                    Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
+                    startActivity(intent);
                 });
-    }
-
-    private Bitmap getRotatedBitmap(Bitmap bitmap) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
-    private void processImage(Bitmap image) {
-        ArrayList<Point> corners = mDocumentFinder.findCorners(image);
-        if (corners == null) {
-            Toast.makeText(this, "Please try that again.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String tempFilename = "image.jpg";
-        saveBitmapToDisk(image, tempFilename);
-        image.recycle();
-
-        Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
-        intent.putParcelableArrayListExtra("corners", corners);
-        intent.putExtra("bitmap", tempFilename);
-        startActivity(intent);
-    }
-
-    private void saveBitmapToDisk(Bitmap bitmap, String filename) {
-        try {
-            FileOutputStream fos = this.openFileOutput(filename, Context.MODE_PRIVATE);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     
     private void onFinish() {
@@ -181,8 +116,8 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private Size getPhotoSize(Collection<Size> sizes) {
-        int maxSize = 2 * 1024 * 1024;
-        double ratio = 16.0 / 9.0;
+        int maxSize = 4 * 1024 * 1024;
+        double ratio = 4.0 / 3.0;
         sizes.removeIf(size -> size.width * size.height > maxSize);
         sizes.removeIf(size -> Math.max(size.width, size.height) / Math.min(size.width, size.height) - ratio > 0.05);
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));

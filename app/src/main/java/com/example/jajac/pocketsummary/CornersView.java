@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,12 +24,11 @@ public class CornersView extends FrameLayout {
 
     private Context mContext;
     private Paint mPaint;
+    private CornersView mCornersView;
     private ImageView topLeft;
     private ImageView topRight;
     private ImageView bottomRight;
     private ImageView bottomLeft;
-
-    private ImageView mClickedCorner;
 
     public CornersView(@NonNull Context context) {
         super(context);
@@ -49,6 +49,7 @@ public class CornersView extends FrameLayout {
     }
 
     private void create() {
+        mCornersView = this;
         topLeft = getCornerView(0, 0);
         topRight = getCornerView(getWidth(), 0);
         bottomRight = getCornerView(getWidth(), getHeight());
@@ -64,8 +65,8 @@ public class CornersView extends FrameLayout {
 
     private void createPaint() {
         mPaint = new Paint();
-        mPaint.setColor(ContextCompat.getColor(mContext, R.color.colorPrimary));
-        mPaint.setStrokeWidth(5);
+        mPaint.setColor(ContextCompat.getColor(mContext, R.color.colorAccent));
+        mPaint.setStrokeWidth(10);
         mPaint.setAntiAlias(true);
     }
 
@@ -74,10 +75,11 @@ public class CornersView extends FrameLayout {
         LayoutParams layoutParams = new LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         imageView.setLayoutParams(layoutParams);
-        imageView.setImageResource(R.drawable.ic_circle_24dp);
+        imageView.setImageResource(R.drawable.ic_adjust_48dp);
+        imageView.setColorFilter(ContextCompat.getColor(mContext, R.color.colorAccent));
         imageView.setX(x);
         imageView.setY(y);
-        imageView.setOnTouchListener((view, motionEvent) -> onCornerTouch(view, motionEvent));
+        imageView.setOnTouchListener(new CornerTouchListener());
         return imageView;
     }
 
@@ -120,24 +122,31 @@ public class CornersView extends FrameLayout {
                 topLeft.getX() + offset, topLeft.getY() + offset, mPaint);
     }
 
-    private boolean onCornerTouch(View view, MotionEvent motionEvent) {
-        switch (motionEvent.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                if (view == topLeft || view == topRight || view == bottomRight || view == bottomLeft) {
-                    mClickedCorner = (ImageView) view;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                mClickedCorner = null;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (mClickedCorner != null) {
-                    mClickedCorner.setX(mClickedCorner.getX() + motionEvent.getX());
-                    mClickedCorner.setY(mClickedCorner.getY() + motionEvent.getY());
-                }
-                break;
+    private class CornerTouchListener implements OnTouchListener {
+        PointF pressedPt = new PointF();
+        PointF imgStartPt = new PointF();
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    pressedPt.x = event.getX();
+                    pressedPt.y = event.getY();
+                    imgStartPt.x = view.getX();
+                    imgStartPt.y = view.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    PointF current = new PointF(event.getX() - pressedPt.x, event.getY() - pressedPt.y);
+                    view.setX((int) (imgStartPt.x + current.x));
+                    view.setY((int) (imgStartPt.y + current.y));
+                    imgStartPt.x = view.getX();
+                    imgStartPt.y = view.getY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+            }
+            mCornersView.invalidate();
+            return true;
         }
-        this.invalidate();
-        return true;
     }
 }
