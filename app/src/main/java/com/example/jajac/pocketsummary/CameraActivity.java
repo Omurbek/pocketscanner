@@ -1,7 +1,6 @@
 package com.example.jajac.pocketsummary;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -121,5 +120,7 @@ public class CameraActivity extends AppCompatActivity {
         sizes.removeIf(size -> size.width * size.height > maxSize);
         sizes.removeIf(size -> Math.max(size.width, size.height) / Math.min(size.width, size.height) - ratio > 0.05);
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));
+//        return Collections.max(sizes, (left, right) -> Integer.compare(
+//                left.width * left.height, right.width * right.height));
     }
 }

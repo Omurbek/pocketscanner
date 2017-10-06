@@ -56,8 +56,6 @@ public class CornersActivity extends AppCompatActivity {
         mCornersView = findViewById(R.id.activity_corners_corners_container);
         mBackBtn = findViewById(R.id.activity_corners_back_btn);
         mFinishBtn = findViewById(R.id.activity_corners_finish_btn);
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setCancelable(false);
 
         mBackBtn.setOnClickListener(view -> onBack());
         mFinishBtn.setOnClickListener(view -> onFinish());
@@ -70,6 +68,8 @@ public class CornersActivity extends AppCompatActivity {
     }
 
     private void setScaledBitmapAndCorners() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage("Processing...");
         mProgressDialog.show();
 
