@@ -79,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "Internal OpenCV found. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-
-        // TODO: Remove this, it's only for testing
-        onCameraClicked();
     }
 
     private void onCameraClicked() {

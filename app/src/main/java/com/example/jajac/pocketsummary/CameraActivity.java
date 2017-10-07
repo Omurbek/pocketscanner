@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.widget.Toast;
 
 import java.util.Collection;
@@ -24,7 +23,6 @@ import static io.fotoapparat.parameter.selector.FocusModeSelectors.continuousFoc
 import static io.fotoapparat.parameter.selector.FocusModeSelectors.fixed;
 import static io.fotoapparat.parameter.selector.LensPositionSelectors.back;
 import static io.fotoapparat.parameter.selector.Selectors.firstAvailable;
-import static io.fotoapparat.parameter.selector.SizeSelectors.biggestSize;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -50,8 +48,8 @@ public class CameraActivity extends AppCompatActivity {
 
         mFotoapparat = Fotoapparat.with(this).into(mCameraView)
                 .previewScaleType(ScaleType.CENTER_INSIDE)
-                .previewSize(biggestSize())
-                .photoSize(biggestSize())
+                .previewSize(this::getPreviewSize)
+                .photoSize(this::getPhotoSize)
                 .lensPosition(back())
                 .focusMode(firstAvailable(
                         continuousFocus(),
@@ -103,24 +101,12 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private Size getPreviewSize(Collection<Size> sizes) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        // swap width and height because camera sensor's default orientation
-        // is landscape and we prefer portrait mode in this case
-        Size screenSize = new Size(displayMetrics.heightPixels, displayMetrics.widthPixels);
-        if (sizes.contains(screenSize)) {
-            return screenSize;
-        }
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));
     }
 
     private Size getPhotoSize(Collection<Size> sizes) {
-        int maxSize = 4 * 1024 * 1024;
-        double ratio = 4.0 / 3.0;
-        sizes.removeIf(size -> size.width * size.height > maxSize);
-        sizes.removeIf(size -> Math.max(size.width, size.height) / Math.min(size.width, size.height) - ratio > 0.05);
+        double ratio = 16.0 / 9.0;
+        sizes.removeIf(size -> Math.abs((double) size.width / (double) size.height - ratio) > 0.02);
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));
-//        return Collections.max(sizes, (left, right) -> Integer.compare(
-//                left.width * left.height, right.width * right.height));
     }
 }
