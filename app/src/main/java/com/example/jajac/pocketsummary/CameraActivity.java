@@ -97,7 +97,7 @@ public class CameraActivity extends AppCompatActivity {
     }
     
     private void onFinish() {
-        Toast.makeText(this, "Finish!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     private Size getPreviewSize(Collection<Size> sizes) {

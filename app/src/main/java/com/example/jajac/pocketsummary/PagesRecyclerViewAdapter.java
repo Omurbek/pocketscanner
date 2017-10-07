@@ -39,18 +39,18 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
         if (bitmapWidth > bitmapHeight) {
             double ratio = (double) bitmapWidth / (double) viewSize;
             resizedWidth = viewSize;
-            resizedHeight = (int) (bitmapHeight * ratio);
+            resizedHeight = (int) (bitmapHeight / ratio);
         } else {
             double ratio = (double) bitmapHeight / (double) viewSize;
             resizedHeight = viewSize;
-            resizedWidth = (int) (bitmapWidth * ratio);
+            resizedWidth = (int) (bitmapWidth / ratio);
         }
 
         Bitmap smallBitmap = Bitmap.createScaledBitmap(mItems.get(position), resizedWidth, resizedHeight, false);
 
         holder.mItem = mItems.get(position);
         holder.mImgView.setImageBitmap(smallBitmap);
-        holder.mStatusText.setText("Processing...");
+        holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
     }
 
     @Override
@@ -69,9 +69,9 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
             super(itemView);
             mItemView = itemView;
 
-            mImgView = (ImageView) itemView.findViewById(R.id.page_item_img);
-            mStatusText = (TextView) itemView.findViewById(R.id.page_item_status_txt);
-            mProgressBar = (ProgressBar) itemView.findViewById(R.id.page_item_progress);
+            mImgView = itemView.findViewById(R.id.page_item_img);
+            mStatusText = itemView.findViewById(R.id.page_item_status_txt);
+            mProgressBar = itemView.findViewById(R.id.page_item_progress);
         }
     }
 

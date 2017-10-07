@@ -1,19 +1,27 @@
 package com.example.jajac.pocketsummary;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -28,9 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 2;
 
-    private ImageButton mCameraBtn;
-    private ImageButton mGalleryBtn;
+    private LinearLayout mCameraBtn;
+    private LinearLayout mGalleryBtn;
     private RecyclerView mPagesRecyclerView;
+    private TextView mPagesEmptyText;
 
     private PagesRecyclerViewAdapter mPagesAdapter;
 
@@ -49,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mPagesAdapter.notifyDataSetChanged();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,12 +77,27 @@ public class MainActivity extends AppCompatActivity {
         mGalleryBtn = findViewById(R.id.activity_main_btn_gallery);
         mGalleryBtn.setOnClickListener(view -> onGalleryClicked());
 
+        mPagesEmptyText = findViewById(R.id.activity_main_pages_empty);
+
         mPagesRecyclerView = findViewById(R.id.activity_main_pages_list);
         DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.list_divider));
         mPagesRecyclerView.addItemDecoration(divider);
         mPagesAdapter = new PagesRecyclerViewAdapter(this, BitmapsHolder.getInstance().getAll());
         mPagesRecyclerView.setAdapter(mPagesAdapter);
+
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(
+                mBroadcastReceiver, new IntentFilter("new-page"));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mPagesAdapter.getItemCount() > 0) {
+            mPagesEmptyText.setVisibility(View.GONE);
+        } else {
+            mPagesEmptyText.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -146,5 +177,11 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode != RESULT_OK) {
             return;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(mBroadcastReceiver);
     }
 }

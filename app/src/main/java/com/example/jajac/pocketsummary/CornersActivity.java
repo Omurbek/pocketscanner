@@ -1,12 +1,14 @@
 package com.example.jajac.pocketsummary;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -77,19 +79,29 @@ public class CornersActivity extends AppCompatActivity {
     }
 
     private void onBack() {
-        mBitmapsHolder.removeLast();
-        mBitmap.recycle();
+        if (!mProcessed) {
+            mBitmapsHolder.removeLast();
+            mBitmap.recycle();
+        }
         onBackPressed();
     }
 
     private void onFinish() {
-        mCorners = mCornersView.getPoints();
-        for (Point point : mCorners) {
-            point.x *= mPreviewRatio;
-            point.y *= mPreviewRatio;
+        // if the image is not yet processed,
+        // it means corner locations are set and approved
+        if (!mProcessed) {
+            mCorners = mCornersView.getPoints();
+            for (Point point : mCorners) {
+                point.x *= mPreviewRatio;
+                point.y *= mPreviewRatio;
+            }
+            CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmapsHolder.getLast(), mCorners);
+            task.execute();
+        } else {
+            Intent intent = new Intent("new-page");
+            LocalBroadcastManager.getInstance(CornersActivity.this).sendBroadcast(intent);
+            finish();
         }
-        CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmapsHolder.getLast(), mCorners);
-        task.execute();
     }
 
     public class FixRotationGetCornersTask extends AsyncTask<Void, Bitmap, Void> {
@@ -224,6 +236,8 @@ public class CornersActivity extends AppCompatActivity {
             transformMat.release();
             imageMat.release();
 
+            BitmapsHolder.getInstance().removeLast();
+            BitmapsHolder.getInstance().addBitmap(image);
             return image;
         }
 

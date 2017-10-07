@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">PocketSummary</string>
+
+    <string name="activity_main_pages_empty">No pages to process</string>
+    <string name="activity_main_camera_text">Capture</string>
+    <string name="activity_main_gallery_text">Choose</string>
+    <string name="activity_main_process_text">Process</string>
+
+    <string name="page_item_pending_text">Pending</string>
+    <string name="page_item_processing_text">Processing&#8230;</string>
+    <string name="page_item_finished_text">Done!</string>
 </resources>
