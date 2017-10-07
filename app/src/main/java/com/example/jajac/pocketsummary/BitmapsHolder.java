@@ -19,6 +19,10 @@ class BitmapsHolder {
         return mInstance;
     }
 
+    public List<Bitmap> getAll() {
+        return this.mBitmaps;
+    }
+
     public void addBitmap(Bitmap bitmap) {
         mBitmaps.add(bitmap);
     }

@@ -5,4 +5,8 @@
     <dimen name="fab_small_size">56dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="page_item_padding">8dp</dimen>
+    <dimen name="page_item_img_size">96dp</dimen>
+    <dimen name="page_item_progress_size">56dp</dimen>
+
 </resources>

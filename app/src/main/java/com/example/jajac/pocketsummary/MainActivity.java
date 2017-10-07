@@ -6,8 +6,11 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -25,8 +28,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 2;
 
-    ImageButton mCameraBtn;
-    ImageButton mGalleryBtn;
+    private ImageButton mCameraBtn;
+    private ImageButton mGalleryBtn;
+    private RecyclerView mPagesRecyclerView;
+
+    private PagesRecyclerViewAdapter mPagesAdapter;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -49,13 +55,18 @@ public class MainActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
-        int x = findViewById(android.R.id.content).getWidth();
-
-        mCameraBtn = (ImageButton) findViewById(R.id.activity_main_btn_camera);
+        mCameraBtn = findViewById(R.id.activity_main_btn_camera);
         mCameraBtn.setOnClickListener(view -> onCameraClicked());
 
-        mGalleryBtn = (ImageButton) findViewById(R.id.activity_main_btn_gallery);
+        mGalleryBtn = findViewById(R.id.activity_main_btn_gallery);
         mGalleryBtn.setOnClickListener(view -> onGalleryClicked());
+
+        mPagesRecyclerView = findViewById(R.id.activity_main_pages_list);
+        DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.list_divider));
+        mPagesRecyclerView.addItemDecoration(divider);
+        mPagesAdapter = new PagesRecyclerViewAdapter(this, BitmapsHolder.getInstance().getAll());
+        mPagesRecyclerView.setAdapter(mPagesAdapter);
     }
 
     @Override
