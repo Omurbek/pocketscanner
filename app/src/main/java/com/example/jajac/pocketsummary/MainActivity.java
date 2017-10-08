@@ -18,9 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.list_divider));
         mPagesRecyclerView.addItemDecoration(divider);
-        mPagesAdapter = new PagesRecyclerViewAdapter(this, BitmapsHolder.getInstance().getAll());
+        mPagesAdapter = new PagesRecyclerViewAdapter(this, DocumentHolder.getInstance().getAllPages());
         mPagesRecyclerView.setAdapter(mPagesAdapter);
 
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(

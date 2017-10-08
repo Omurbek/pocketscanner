@@ -40,7 +40,7 @@ public class CornersActivity extends AppCompatActivity {
 
     private Bitmap mBitmap;
     private List<Point> mCorners;
-    private BitmapsHolder mBitmapsHolder;
+    private DocumentHolder mDocumentHolder;
     private DocumentFinder mDocumentFinder;
     private double mPreviewRatio;
 
@@ -63,8 +63,8 @@ public class CornersActivity extends AppCompatActivity {
         mFinishBtn.setOnClickListener(view -> onFinish());
 
         mDocumentFinder = new DocumentFinder(9, 0.04, true);
-        mBitmapsHolder = BitmapsHolder.getInstance();
-        mBitmap = mBitmapsHolder.getLast();
+        mDocumentHolder = DocumentHolder.getInstance();
+        mBitmap = mDocumentHolder.getLastPage();
 
         mContainer.post(this::setScaledBitmapAndCorners);
     }
@@ -80,7 +80,7 @@ public class CornersActivity extends AppCompatActivity {
 
     private void onBack() {
         if (!mProcessed) {
-            mBitmapsHolder.removeLast();
+            mDocumentHolder.removeLastPage();
             mBitmap.recycle();
         }
         onBackPressed();
@@ -95,7 +95,7 @@ public class CornersActivity extends AppCompatActivity {
                 point.x *= mPreviewRatio;
                 point.y *= mPreviewRatio;
             }
-            CropTransformBinarizeTask task = new CropTransformBinarizeTask(mBitmapsHolder.getLast(), mCorners);
+            CropTransformBinarizeTask task = new CropTransformBinarizeTask(mDocumentHolder.getLastPage(), mCorners);
             task.execute();
         } else {
             Intent intent = new Intent("new-page");
@@ -154,8 +154,8 @@ public class CornersActivity extends AppCompatActivity {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
                 mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
-                mBitmapsHolder.removeLast();
-                mBitmapsHolder.addBitmap(mBitmap);
+                mDocumentHolder.removeLastPage();
+                mDocumentHolder.addPage(mBitmap);
             }
         }
 
@@ -236,8 +236,8 @@ public class CornersActivity extends AppCompatActivity {
             transformMat.release();
             imageMat.release();
 
-            BitmapsHolder.getInstance().removeLast();
-            BitmapsHolder.getInstance().addBitmap(image);
+            DocumentHolder.getInstance().removeLastPage();
+            DocumentHolder.getInstance().addPage(image);
             return image;
         }
 

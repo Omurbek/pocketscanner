@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +33,7 @@ public class CameraActivity extends AppCompatActivity {
     private FloatingActionButton mFinishBtn;
 
     private Fotoapparat mFotoapparat;
-    private BitmapsHolder mBitmapsHolder;
+    private DocumentHolder mDocumentHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +61,7 @@ public class CameraActivity extends AppCompatActivity {
                         torch()
                 )).build();
 
-        mBitmapsHolder = BitmapsHolder.getInstance();
+        mDocumentHolder = DocumentHolder.getInstance();
 
         mBackBtn.setOnClickListener(view -> onBack());
         mCaptureBtn.setOnClickListener(view -> onCapture());
@@ -90,7 +89,7 @@ public class CameraActivity extends AppCompatActivity {
         photoResult
                 .toBitmap()
                 .whenAvailable(result -> {
-                    mBitmapsHolder.addBitmap(result.bitmap);
+                    mDocumentHolder.addPage(result.bitmap);
                     Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
                     startActivity(intent);
                 });
