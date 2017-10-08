@@ -23,6 +23,10 @@ class DocumentHolder {
         return this.mPages;
     }
 
+    public int getPageCount() {
+        return this.mPages.size();
+    }
+
     public void addPage(Page bitmap) {
         mPages.add(bitmap);
     }
@@ -31,12 +35,32 @@ class DocumentHolder {
         return mPages.get(mPages.size() - 1);
     }
 
+    public Page getPage(int index) {
+        return mPages.get(index);
+    }
+
     public void removeLastPage() {
         mPages.remove(mPages.size() - 1);
     }
 
+    public Bitmap getPageBitmap(int index) {
+        return getPage(index).getBitmap();
+    }
+
     public Bitmap getLastPageBitmap() {
         return getLastPage().getBitmap();
+    }
+
+    public void setPageState(int index, int state) {
+        mPages.get(index).setState(state);
+    }
+
+    public void setPageWords(int index, List<String> words) {
+        mPages.get(index).setWords(words);
+    }
+
+    public List<String> getPageWords(int index) {
+        return mPages.get(index).getWords();
     }
 
 }

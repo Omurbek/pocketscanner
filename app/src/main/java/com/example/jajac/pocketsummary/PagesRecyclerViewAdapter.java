@@ -46,12 +46,27 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
             resizedWidth = (int) (bitmapWidth / ratio);
         }
 
-        Bitmap smallBitmap = Bitmap.createScaledBitmap(
-                mItems.get(position).getBitmap(), resizedWidth, resizedHeight, false);
+        Page page = mItems.get(position);
 
-        holder.mItem = mItems.get(position);
+        Bitmap smallBitmap = Bitmap.createScaledBitmap(page.getBitmap(), resizedWidth, resizedHeight, false);
+
+        holder.mItem = page;
         holder.mImgView.setImageBitmap(smallBitmap);
-        holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
+
+        switch (page.getState()) {
+            case Page.STATE_PENDING:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
+                holder.mProgressBar.setVisibility(View.INVISIBLE);
+                break;
+            case Page.STATE_PROCESSING:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_processing_text));
+                holder.mProgressBar.setVisibility(View.VISIBLE);
+                break;
+            case Page.STATE_FINISHED:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_finished_text));
+                holder.mProgressBar.setVisibility(View.INVISIBLE);
+                break;
+        }
     }
 
     @Override

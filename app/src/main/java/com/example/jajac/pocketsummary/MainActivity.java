@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -16,15 +18,25 @@ import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private LinearLayout mCameraBtn;
     private LinearLayout mGalleryBtn;
+    private LinearLayout mProcessBtn;
     private RecyclerView mPagesRecyclerView;
     private TextView mPagesEmptyText;
 
@@ -74,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
 
         mGalleryBtn = findViewById(R.id.activity_main_btn_gallery);
         mGalleryBtn.setOnClickListener(view -> onGalleryClicked());
+
+        mProcessBtn = findViewById(R.id.activity_main_btn_process);
+        mProcessBtn.setOnClickListener(view -> onProcessClicked());
 
         mPagesEmptyText = findViewById(R.id.activity_main_pages_empty);
 
@@ -140,6 +156,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void onProcessClicked() {
+        DocumentHolder docHolder = DocumentHolder.getInstance();
+        for (int i = 0; i < docHolder.getPageCount(); i++) {
+            new FindTextAsyncTask(i).execute();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -181,5 +204,65 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(mBroadcastReceiver);
+    }
+
+    public class FindTextAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private int mPageIndex;
+
+        public FindTextAsyncTask(int index) {
+            mPageIndex = index;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_PROCESSING);
+            mPagesAdapter.notifyItemChanged(mPageIndex);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            TextRecognizer textRecognizer = new TextRecognizer.Builder(MainActivity.this).build();
+            try {
+                if (!textRecognizer.isOperational()) {
+                    Toast.makeText(MainActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                }
+
+                Bitmap bitmap = DocumentHolder.getInstance().getPageBitmap(mPageIndex);
+                Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+                SparseArray<TextBlock> detectedBlocks = textRecognizer.detect(frame);
+
+                List<TextBlock> blocks = new ArrayList<>();
+                for (int i = 0; i < detectedBlocks.size(); i++) {
+                    blocks.add(detectedBlocks.valueAt(i));
+                }
+
+                Collections.sort(blocks, (left, right) -> {
+                    int verticalDiff = left.getBoundingBox().top - right.getBoundingBox().top;
+                    int horizontalDiff = left.getBoundingBox().left - right.getBoundingBox().left;
+                    if (verticalDiff != 0) {
+                        return verticalDiff;
+                    }
+                    return horizontalDiff;
+                });
+
+                List<String> words = new ArrayList<>();
+                for (TextBlock tb : blocks) {
+                    words.add(tb.getValue());
+                }
+                DocumentHolder.getInstance().setPageWords(mPageIndex, words);
+            } finally {
+                textRecognizer.release();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_FINISHED);
+            mPagesAdapter.notifyItemChanged(mPageIndex);
+        }
     }
 }
