@@ -8,7 +8,7 @@ import java.util.List;
 class DocumentHolder {
 
     private static DocumentHolder mInstance;
-    private List<Bitmap> mPages = new ArrayList<>();
+    private List<Page> mPages = new ArrayList<>();
 
     private DocumentHolder() {}
 
@@ -19,20 +19,24 @@ class DocumentHolder {
         return mInstance;
     }
 
-    public List<Bitmap> getAllPages() {
+    public List<Page> getAllPages() {
         return this.mPages;
     }
 
-    public void addPage(Bitmap bitmap) {
+    public void addPage(Page bitmap) {
         mPages.add(bitmap);
     }
 
-    public Bitmap getLastPage() {
+    public Page getLastPage() {
         return mPages.get(mPages.size() - 1);
     }
 
     public void removeLastPage() {
         mPages.remove(mPages.size() - 1);
+    }
+
+    public Bitmap getLastPageBitmap() {
+        return getLastPage().getBitmap();
     }
 
 }

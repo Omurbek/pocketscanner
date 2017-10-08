@@ -15,9 +15,9 @@ import java.util.List;
 public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecyclerViewAdapter.PageViewHolder> {
 
     private Context mContext;
-    private final List<Bitmap> mItems;
+    private final List<Page> mItems;
 
-    public PagesRecyclerViewAdapter(Context context, List<Bitmap> items) {
+    public PagesRecyclerViewAdapter(Context context, List<Page> items) {
         mContext = context;
         mItems = items;
     }
@@ -46,7 +46,8 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
             resizedWidth = (int) (bitmapWidth / ratio);
         }
 
-        Bitmap smallBitmap = Bitmap.createScaledBitmap(mItems.get(position), resizedWidth, resizedHeight, false);
+        Bitmap smallBitmap = Bitmap.createScaledBitmap(
+                mItems.get(position).getBitmap(), resizedWidth, resizedHeight, false);
 
         holder.mItem = mItems.get(position);
         holder.mImgView.setImageBitmap(smallBitmap);
@@ -63,7 +64,7 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
         public final ImageView mImgView;
         public final TextView mStatusText;
         public final ProgressBar mProgressBar;
-        public Bitmap mItem;
+        public Page mItem;
 
         public PageViewHolder(View itemView, ViewGroup parent) {
             super(itemView);

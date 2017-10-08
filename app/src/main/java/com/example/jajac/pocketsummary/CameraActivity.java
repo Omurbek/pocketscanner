@@ -89,7 +89,7 @@ public class CameraActivity extends AppCompatActivity {
         photoResult
                 .toBitmap()
                 .whenAvailable(result -> {
-                    mDocumentHolder.addPage(result.bitmap);
+                    mDocumentHolder.addPage(new Page(result.bitmap));
                     Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
                     startActivity(intent);
                 });

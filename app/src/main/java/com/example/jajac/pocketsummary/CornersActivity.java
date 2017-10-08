@@ -64,7 +64,7 @@ public class CornersActivity extends AppCompatActivity {
 
         mDocumentFinder = new DocumentFinder(9, 0.04, true);
         mDocumentHolder = DocumentHolder.getInstance();
-        mBitmap = mDocumentHolder.getLastPage();
+        mBitmap = mDocumentHolder.getLastPageBitmap();
 
         mContainer.post(this::setScaledBitmapAndCorners);
     }
@@ -95,7 +95,7 @@ public class CornersActivity extends AppCompatActivity {
                 point.x *= mPreviewRatio;
                 point.y *= mPreviewRatio;
             }
-            CropTransformBinarizeTask task = new CropTransformBinarizeTask(mDocumentHolder.getLastPage(), mCorners);
+            CropTransformBinarizeTask task = new CropTransformBinarizeTask(mDocumentHolder.getLastPageBitmap(), mCorners);
             task.execute();
         } else {
             Intent intent = new Intent("new-page");
@@ -155,7 +155,7 @@ public class CornersActivity extends AppCompatActivity {
                 matrix.postRotate(90);
                 mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
                 mDocumentHolder.removeLastPage();
-                mDocumentHolder.addPage(mBitmap);
+                mDocumentHolder.addPage(new Page(mBitmap));
             }
         }
 
@@ -237,7 +237,7 @@ public class CornersActivity extends AppCompatActivity {
             imageMat.release();
 
             DocumentHolder.getInstance().removeLastPage();
-            DocumentHolder.getInstance().addPage(image);
+            DocumentHolder.getInstance().addPage(new Page(image));
             return image;
         }
 
