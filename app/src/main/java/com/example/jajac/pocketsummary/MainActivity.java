@@ -36,7 +36,6 @@ import org.opencv.android.OpenCVLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -233,12 +232,13 @@ public class MainActivity extends AppCompatActivity {
                 Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                 SparseArray<TextBlock> detectedBlocks = textRecognizer.detect(frame);
 
-                List<TextBlock> blocks = new ArrayList<>();
+                List<TextBlock> textBlocks = new ArrayList<>();
                 for (int i = 0; i < detectedBlocks.size(); i++) {
-                    blocks.add(detectedBlocks.valueAt(i));
+                    textBlocks.add(detectedBlocks.valueAt(i));
                 }
 
-                Collections.sort(blocks, (left, right) -> {
+                // sort blocks top-to-bottom, left-to-right
+                Collections.sort(textBlocks, (left, right) -> {
                     int verticalDiff = left.getBoundingBox().top - right.getBoundingBox().top;
                     int horizontalDiff = left.getBoundingBox().left - right.getBoundingBox().left;
                     if (verticalDiff != 0) {
@@ -247,11 +247,11 @@ public class MainActivity extends AppCompatActivity {
                     return horizontalDiff;
                 });
 
-                List<String> words = new ArrayList<>();
-                for (TextBlock tb : blocks) {
-                    words.add(tb.getValue());
+                List<String> blocks = new ArrayList<>();
+                for (TextBlock tb : textBlocks) {
+                    blocks.add(tb.getValue());
                 }
-                DocumentHolder.getInstance().setPageWords(mPageIndex, words);
+                DocumentHolder.getInstance().setPageBlocks(mPageIndex, blocks);
             } finally {
                 textRecognizer.release();
                 return null;

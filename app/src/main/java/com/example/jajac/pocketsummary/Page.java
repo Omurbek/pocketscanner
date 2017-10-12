@@ -13,7 +13,7 @@ public class Page {
     private int mState = STATE_PENDING;
     private Bitmap mBitmap;
 
-    private List<String> mWords;
+    private List<String> mBlocks;
 
     public Page(Bitmap bitmap) {
         mBitmap = bitmap;
@@ -43,12 +43,12 @@ public class Page {
         return mBitmap.getHeight();
     }
 
-    public List<String> getWords() {
-        return mWords;
+    public List<String> getBlocks() {
+        return mBlocks;
     }
 
-    public void setWords(List<String> mWords) {
-        this.mWords = mWords;
+    public void setBlocks(List<String> blocks) {
+        this.mBlocks = blocks;
     }
 
 }

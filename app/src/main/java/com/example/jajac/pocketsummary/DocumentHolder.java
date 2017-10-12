@@ -55,12 +55,12 @@ class DocumentHolder {
         mPages.get(index).setState(state);
     }
 
-    public void setPageWords(int index, List<String> words) {
-        mPages.get(index).setWords(words);
+    public void setPageBlocks(int index, List<String> blocks) {
+        mPages.get(index).setBlocks(blocks);
     }
 
-    public List<String> getPageWords(int index) {
-        return mPages.get(index).getWords();
+    public List<String> getPageBlocks(int index) {
+        return mPages.get(index).getBlocks();
     }
 
 }
