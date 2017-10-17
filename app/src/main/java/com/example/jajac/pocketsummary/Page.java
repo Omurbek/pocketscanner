@@ -7,8 +7,9 @@ import java.util.List;
 public class Page {
 
     public static final int STATE_PENDING = 0;
-    public static final int STATE_PROCESSING = 1;
-    public static final int STATE_FINISHED = 2;
+    public static final int STATE_DETECTING_TEXT = 1;
+    public static final int STATE_TRANSLATING = 2;
+    public static final int STATE_FINISHED = 3;
 
     private int mState = STATE_PENDING;
     private Bitmap mBitmap;

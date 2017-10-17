@@ -58,8 +58,12 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
                 break;
-            case Page.STATE_PROCESSING:
-                holder.mStatusText.setText(mContext.getString(R.string.page_item_processing_text));
+            case Page.STATE_DETECTING_TEXT:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_detecting_text));
+                holder.mProgressBar.setVisibility(View.VISIBLE);
+                break;
+            case Page.STATE_TRANSLATING:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_translating_text));
                 holder.mProgressBar.setVisibility(View.VISIBLE);
                 break;
             case Page.STATE_FINISHED:

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -33,9 +34,21 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -158,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     private void onProcessClicked() {
         DocumentHolder docHolder = DocumentHolder.getInstance();
         for (int i = 0; i < docHolder.getPageCount(); i++) {
-            new FindTextAsyncTask(i).execute();
+            new DetectTextTask(i).execute();
         }
     }
 
@@ -205,18 +218,18 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(mBroadcastReceiver);
     }
 
-    public class FindTextAsyncTask extends AsyncTask<Void, Void, Void> {
+    public class DetectTextTask extends AsyncTask<Void, Void, Void> {
 
         private int mPageIndex;
 
-        public FindTextAsyncTask(int index) {
+        public DetectTextTask(int index) {
             mPageIndex = index;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_PROCESSING);
+            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_DETECTING_TEXT);
             mPagesAdapter.notifyItemChanged(mPageIndex);
         }
 
@@ -261,8 +274,91 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            TranslateTask translateTask = new TranslateTask(mPageIndex);
+            translateTask.execute();
+        }
+    }
+
+    public class TranslateTask extends AsyncTask<Void, Void, Void> {
+
+        private int mPageIndex;
+
+        public TranslateTask(int index) {
+            mPageIndex = index;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_TRANSLATING);
+            mPagesAdapter.notifyItemChanged(mPageIndex);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Uri.Builder builder = new Uri.Builder()
+                    .scheme("https")
+                    .authority("api.microsofttranslator.com")
+                    .appendPath("V2")
+                    .appendPath("Http.svc")
+                    .appendPath("Translate")
+                    .appendQueryParameter("text", "It works! Page: " + String.valueOf(mPageIndex))
+                    .appendQueryParameter("from", "en")
+                    .appendQueryParameter("to", "sr");
+
+            String urlString = builder.build().toString();
+            URL url = null;
+            try {
+                url = new URL(urlString);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            if (url != null) {
+                InputStream stream = null;
+                HttpsURLConnection connection = null;
+                String result = null;
+                try {
+                    connection = (HttpsURLConnection) url.openConnection();
+                    connection.setReadTimeout(3000);
+                    connection.setConnectTimeout(3000);
+                    connection.setRequestMethod("GET");
+                    connection.setDoInput(true);
+                    connection.setRequestProperty("Ocp-Apim-Subscription-Key", "13b8ffca8e9e4ffabbf4c9e3947b5145");
+                    connection.connect();
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpsURLConnection.HTTP_OK) {
+                        String str = streamToString(connection.getInputStream(), 10000);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
             DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_FINISHED);
             mPagesAdapter.notifyItemChanged(mPageIndex);
+        }
+
+        public String streamToString(InputStream stream, int maxReadSize) throws IOException {
+            Reader reader = null;
+            reader = new InputStreamReader(stream, "UTF-8");
+            char[] rawBuffer = new char[maxReadSize];
+            int readSize;
+            StringBuffer buffer = new StringBuffer();
+            while (((readSize = reader.read(rawBuffer)) != -1) && maxReadSize > 0) {
+                if (readSize > maxReadSize) {
+                    readSize = maxReadSize;
+                }
+                buffer.append(rawBuffer, 0, readSize);
+                maxReadSize -= readSize;
+            }
+            return buffer.toString();
         }
     }
 }
