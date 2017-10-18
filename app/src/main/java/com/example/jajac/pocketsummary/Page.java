@@ -2,10 +2,12 @@ package com.example.jajac.pocketsummary;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Page {
 
+    public static final int STATE_ERROR = -1;
     public static final int STATE_PENDING = 0;
     public static final int STATE_DETECTING_TEXT = 1;
     public static final int STATE_TRANSLATING = 2;
@@ -15,7 +17,7 @@ public class Page {
     private Bitmap mBitmap;
 
     private List<TextPiece> mBlocks;
-    private List<TextPiece> mTranslatedBlocks;
+    private List<TextPiece> mTranslatedBlocks = new ArrayList<>();
 
     public Page(Bitmap bitmap) {
         mBitmap = bitmap;
@@ -54,11 +56,14 @@ public class Page {
     }
 
     public String getFullText() {
-        String result = "";
-        for (int i = 0; i < mBlocks.size() - 1; i++) {
-            result += mBlocks.get(i).getText() + "\n\n\n";
+        String result = null;
+        if (mBlocks != null && mBlocks.size() > 0) {
+            result = "";
+            for (int i = 0; i < mBlocks.size() - 1; i++) {
+                result += mBlocks.get(i).getText() + "\n\n\n";
+            }
+            result += mBlocks.get(mBlocks.size() - 1).getText();
         }
-        result += mBlocks.get(mBlocks.size() - 1).getText();
         return result;
     }
 

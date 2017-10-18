@@ -52,5 +52,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.gms:play-services-vision:11.0.4'
     compile 'io.fotoapparat.fotoapparat:library:1.4.1'
+    compile 'com.github.chrisbanes:PhotoView:2.0.0'
     testCompile 'junit:junit:4.12'
 }

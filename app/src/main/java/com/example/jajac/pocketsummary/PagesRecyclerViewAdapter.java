@@ -16,10 +16,16 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
 
     private Context mContext;
     private final List<Page> mItems;
+    private OnPageClickListener mListener;
 
-    public PagesRecyclerViewAdapter(Context context, List<Page> items) {
+    public interface OnPageClickListener {
+        void onPageClicked(int pageIndex);
+    }
+
+    public PagesRecyclerViewAdapter(Context context, List<Page> items, OnPageClickListener listener) {
         mContext = context;
         mItems = items;
+        mListener = listener;
     }
 
     @Override
@@ -54,6 +60,10 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
         holder.mImgView.setImageBitmap(smallBitmap);
 
         switch (page.getState()) {
+            case Page.STATE_ERROR:
+                holder.mStatusText.setText(mContext.getString(R.string.page_item_error_text));
+                holder.mProgressBar.setVisibility(View.INVISIBLE);
+                break;
             case Page.STATE_PENDING:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
@@ -71,6 +81,12 @@ public class PagesRecyclerViewAdapter extends RecyclerView.Adapter<PagesRecycler
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
                 break;
         }
+
+        holder.mItemView.setOnClickListener(view -> {
+            if (mListener != null) {
+                mListener.onPageClicked(position);
+            }
+        });
     }
 
     @Override

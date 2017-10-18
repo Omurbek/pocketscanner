@@ -51,7 +51,7 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PagesRecyclerViewAdapter.OnPageClickListener {
 
     public static final String TAG = "MainActivity";
 
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.list_divider));
         mPagesRecyclerView.addItemDecoration(divider);
-        mPagesAdapter = new PagesRecyclerViewAdapter(this, DocumentHolder.getInstance().getAllPages());
+        mPagesAdapter = new PagesRecyclerViewAdapter(this, DocumentHolder.getInstance().getAllPages(), this);
         mPagesRecyclerView.setAdapter(mPagesAdapter);
 
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(
@@ -218,7 +218,17 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(mBroadcastReceiver);
     }
 
-    public class DetectTextTask extends AsyncTask<Void, Void, Void> {
+    @Override
+    public void onPageClicked(int pageIndex) {
+        Intent intent = new Intent(MainActivity.this, PageActivity.class);
+        intent.putExtra("page", pageIndex);
+        startActivity(intent);
+    }
+
+    public class DetectTextTask extends AsyncTask<Void, Void, Integer> {
+
+        public static final int TEXT_ERROR = 0;
+        public static final int TEXT_OK = 1;
 
         private int mPageIndex;
 
@@ -234,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Integer doInBackground(Void... params) {
             TextRecognizer textRecognizer = new TextRecognizer.Builder(MainActivity.this).build();
             try {
                 if (!textRecognizer.isOperational()) {
@@ -248,6 +258,10 @@ public class MainActivity extends AppCompatActivity {
                 List<TextBlock> textBlocks = new ArrayList<>();
                 for (int i = 0; i < detectedBlocks.size(); i++) {
                     textBlocks.add(detectedBlocks.valueAt(i));
+                }
+
+                if (textBlocks.size() == 0) {
+                    return TEXT_ERROR;
                 }
 
                 // sort blocks top-to-bottom, left-to-right
@@ -266,17 +280,22 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 DocumentHolder.getInstance().setPageBlocks(mPageIndex, textPieces);
+                return TEXT_OK;
             } finally {
                 textRecognizer.release();
-                return null;
             }
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            TranslateTask translateTask = new TranslateTask(mPageIndex);
-            translateTask.execute();
+        protected void onPostExecute(Integer status) {
+            super.onPostExecute(status);
+            if (status == TEXT_ERROR) {
+                DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_ERROR);
+                mPagesAdapter.notifyItemChanged(mPageIndex);
+            } else if (status == TEXT_OK) {
+                TranslateTask translateTask = new TranslateTask(mPageIndex);
+                translateTask.execute();
+            }
         }
     }
 
