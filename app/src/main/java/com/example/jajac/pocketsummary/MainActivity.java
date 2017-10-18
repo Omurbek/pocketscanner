@@ -260,11 +260,12 @@ public class MainActivity extends AppCompatActivity {
                     return horizontalDiff;
                 });
 
-                List<String> blocks = new ArrayList<>();
+                List<TextPiece> textPieces = new ArrayList<>();
                 for (TextBlock tb : textBlocks) {
-                    blocks.add(tb.getValue());
+                    textPieces.add(new TextPiece(tb.getBoundingBox(), tb.getValue()));
                 }
-                DocumentHolder.getInstance().setPageBlocks(mPageIndex, blocks);
+
+                DocumentHolder.getInstance().setPageBlocks(mPageIndex, textPieces);
             } finally {
                 textRecognizer.release();
                 return null;
@@ -302,9 +303,9 @@ public class MainActivity extends AppCompatActivity {
                     .appendPath("V2")
                     .appendPath("Http.svc")
                     .appendPath("Translate")
-                    .appendQueryParameter("text", "It works! Page: " + String.valueOf(mPageIndex))
-                    .appendQueryParameter("from", "en")
-                    .appendQueryParameter("to", "sr");
+                    .appendQueryParameter("text", DocumentHolder.getInstance().getPage(mPageIndex).getFullText())
+                    .appendQueryParameter("from", "sr")
+                    .appendQueryParameter("to", "en");
 
             String urlString = builder.build().toString();
             URL url = null;
@@ -315,9 +316,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (url != null) {
-                InputStream stream = null;
                 HttpsURLConnection connection = null;
-                String result = null;
                 try {
                     connection = (HttpsURLConnection) url.openConnection();
                     connection.setReadTimeout(3000);
@@ -329,7 +328,9 @@ public class MainActivity extends AppCompatActivity {
 
                     int responseCode = connection.getResponseCode();
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
-                        String str = streamToString(connection.getInputStream(), 10000);
+                        String fullResult = streamToString(connection.getInputStream(), 10000);
+                        fullResult = fullResult.substring(68, fullResult.length() - 9);
+                        DocumentHolder.getInstance().getPage(mPageIndex).setTranslation(fullResult);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

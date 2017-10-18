@@ -14,7 +14,8 @@ public class Page {
     private int mState = STATE_PENDING;
     private Bitmap mBitmap;
 
-    private List<String> mBlocks;
+    private List<TextPiece> mBlocks;
+    private List<TextPiece> mTranslatedBlocks;
 
     public Page(Bitmap bitmap) {
         mBitmap = bitmap;
@@ -44,12 +45,28 @@ public class Page {
         return mBitmap.getHeight();
     }
 
-    public List<String> getBlocks() {
+    public List<TextPiece> getBlocks() {
         return mBlocks;
     }
 
-    public void setBlocks(List<String> blocks) {
+    public void setBlocks(List<TextPiece> blocks) {
         this.mBlocks = blocks;
+    }
+
+    public String getFullText() {
+        String result = "";
+        for (int i = 0; i < mBlocks.size() - 1; i++) {
+            result += mBlocks.get(i).getText() + "\n\n\n";
+        }
+        result += mBlocks.get(mBlocks.size() - 1).getText();
+        return result;
+    }
+
+    public void setTranslation(String translation) {
+        String[] pieces = translation.split("\n\n\n");
+        for (int i = 0; i < pieces.length; i++) {
+            mTranslatedBlocks.add(new TextPiece(mBlocks.get(i).getBoundingBox(), pieces[i]));
+        }
     }
 
 }
