@@ -74,4 +74,13 @@ public class Page {
         }
     }
 
+    public String getTranslation() {
+        String fullText = "";
+        for (int i = 0; i < mTranslatedBlocks.size() - 1; i++) {
+            fullText += mTranslatedBlocks.get(i).getText() + "\n\n";
+        }
+        fullText += mTranslatedBlocks.get(mTranslatedBlocks.size() - 1).getText();
+        return fullText;
+    }
+
 }

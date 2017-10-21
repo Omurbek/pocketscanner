@@ -11,14 +11,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-
-import com.github.chrisbanes.photoview.PhotoView;
+import android.widget.TextView;
 
 public class PageActivity extends AppCompatActivity {
 
     private int mPageIndex;
 
-    private PhotoView mPhotoView;
+    private TextView mTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +26,7 @@ public class PageActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mPhotoView = findViewById(R.id.activity_page_img);
+        mTextView = findViewById(R.id.activity_page_text);
 
         mPageIndex = getIntent().getIntExtra("page", 0);
 
@@ -37,16 +36,7 @@ public class PageActivity extends AppCompatActivity {
     private void drawImage() {
         Page page = DocumentHolder.getInstance().getPage(mPageIndex);
 
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setTextSize(30);
-        Bitmap bitmap = Bitmap.createBitmap(page.getWidth(), page.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-
-        canvas.drawText("Test text test text test text test text test text", 100, 100, paint);
-
-        mPhotoView.setImageBitmap(bitmap);
+        mTextView.setText(page.getTranslation());
     }
 
 }
