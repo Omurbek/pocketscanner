@@ -13,4 +13,12 @@
     <string name="page_item_error_text">Error: no text!</string>
 
     <string name="activity_page_share_text">Share</string>
+
+    <string name="dialog_share_duration_text">How long is this relevant?</string>
+    <string name="dialog_share_duration_day">1 day</string>
+    <string name="dialog_share_duration_days">3 days</string>
+    <string name="dialog_share_duration_week">7 days</string>
+    <string name="dialog_share_duration_month">30 days</string>
+    <string name="dialog_share_submit_btn">Submit</string>
+    <string name="dialog_share_cancel_btn">Cancel</string>
 </resources>

@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PageActivity extends AppCompatActivity {
 
@@ -14,6 +17,7 @@ public class PageActivity extends AppCompatActivity {
 
     private TextView mTextView;
     private LinearLayout mShareBtn;
+    private AlertDialog mSubmitDg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +45,23 @@ public class PageActivity extends AppCompatActivity {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setView(R.layout.dialog_share);
 
-        AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.show();
+        mSubmitDg = dialogBuilder.create();
+
+        mSubmitDg.setOnShowListener(dialog -> {
+            mSubmitDg.findViewById(R.id.dialog_share_cancel_btn).setOnClickListener(v -> mSubmitDg.dismiss());
+            mSubmitDg.findViewById(R.id.dialog_share_submit_btn).setOnClickListener(v -> onSubmitClicked());
+        });
+        mSubmitDg.show();
+    }
+
+    private void onSubmitClicked() {
+        RadioGroup radioGroup = mSubmitDg.findViewById(R.id.dialog_share_radio_group);
+        int checkedResId = radioGroup.getCheckedRadioButtonId();
+        RadioButton radioButton = mSubmitDg.findViewById(checkedResId);
+
+        int durationInDays = (int) radioButton.getTag();
+
+        mSubmitDg.dismiss();
     }
 
 }

@@ -2,16 +2,73 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
     <TextView
+        android:id="@+id/dialog_share_duration_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="asd"/>
+        android:layout_alignParentTop="true"
+        android:textSize="18sp"
+        android:text="@string/dialog_share_duration_text"/>
 
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/ic_share_24dp"/>
+    <RadioGroup
+        android:id="@+id/dialog_share_radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/dialog_share_duration_text">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/dialog_share_duration_day"
+            android:tag="1"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_share_duration_days"
+            android:tag="3"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_share_duration_week"
+            android:tag="7"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_share_duration_month"
+            android:tag="30"/>
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialog_share_radio_group"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/dialog_share_cancel_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/dialog_share_cancel_btn"/>
+
+        <Button
+            android:id="@+id/dialog_share_submit_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/dialog_share_submit_btn"
+            android:theme="@style/PrimaryButton"/>
+
+    </LinearLayout>
 
 </RelativeLayout>
