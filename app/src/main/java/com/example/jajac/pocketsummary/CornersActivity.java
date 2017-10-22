@@ -32,6 +32,7 @@ public class CornersActivity extends AppCompatActivity {
 
     private static final String TAG = "CornersActivity";
 
+    private boolean mIsCameraPicture;
     private boolean mProcessed;
     private FrameLayout mContainer;
     private ImageView mImageView;
@@ -59,6 +60,8 @@ public class CornersActivity extends AppCompatActivity {
         // Draw this activity full screen, ignoring the status bar (draw below it)
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+        mIsCameraPicture = getIntent().getBooleanExtra("camera", false);
 
         mContainer = findViewById(R.id.activity_corners_container);
         mImageView = findViewById(R.id.activity_corners_img);
@@ -157,7 +160,7 @@ public class CornersActivity extends AppCompatActivity {
             boolean isOrientationPortrait = getResources().getConfiguration().orientation
                     == Configuration.ORIENTATION_PORTRAIT;
 
-            if (isOrientationPortrait) {
+            if (mIsCameraPicture && isOrientationPortrait) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
                 mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);

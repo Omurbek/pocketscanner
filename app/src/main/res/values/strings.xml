@@ -11,4 +11,6 @@
     <string name="page_item_translating_text">Translating&#8230;</string>
     <string name="page_item_finished_text">Done!</string>
     <string name="page_item_error_text">Error: no text!</string>
+
+    <string name="activity_page_share_text">Share</string>
 </resources>

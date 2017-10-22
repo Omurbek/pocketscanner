@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="64dp"
+    android:layout_marginTop="60dp"
     tools:context="com.example.jajac.pocketsummary.PageActivity"
     tools:showIn="@layout/activity_page">
 
@@ -15,8 +15,51 @@
         <TextView
             android:id="@+id/activity_page_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="18sp"/>
 
     </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/activity_page_options_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/activity_page_btn_share"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:gravity="center_horizontal"
+            android:clickable="true"
+            android:background="@drawable/options_bar_background"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="@dimen/activity_main_input_icon_size"
+                android:layout_height="@dimen/activity_main_input_icon_size"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:clickable="false"
+                android:backgroundTint="@color/colorAccent"
+                android:background="@drawable/ic_share_24dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:text="@string/activity_page_share_text"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

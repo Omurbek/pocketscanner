@@ -91,6 +91,7 @@ public class CameraActivity extends AppCompatActivity {
                 .whenAvailable(result -> {
                     mDocumentHolder.addPage(new Page(result.bitmap));
                     Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
+                    intent.putExtra("camera", true);
                     startActivity(intent);
                 });
     }

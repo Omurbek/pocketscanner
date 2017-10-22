@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 2;
+    private static final int REQUEST_CHOOSE_FROM_GALLERY = 3;
 
     private LinearLayout mCameraBtn;
     private LinearLayout mGalleryBtn;
@@ -201,14 +205,25 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     }
 
     private void onUseGallery() {
-        Toast.makeText(this, "To be maybe implemented later.", Toast.LENGTH_SHORT).show();
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent, REQUEST_CHOOSE_FROM_GALLERY);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (resultCode != RESULT_OK) {
-            return;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CHOOSE_FROM_GALLERY) {
+            if (data != null && data.getData() != null) {
+                String fullFilePath = getFullFilePathFromURI(MainActivity.this, data.getData());
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(fullFilePath, options);
+                DocumentHolder.getInstance().addPage(new Page(bitmap));
+                Intent intent = new Intent(MainActivity.this, CornersActivity.class);
+                intent.putExtra("camera", false);
+                startActivity(intent);
+            }
         }
     }
 
@@ -223,6 +238,21 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         Intent intent = new Intent(MainActivity.this, PageActivity.class);
         intent.putExtra("page", pageIndex);
         startActivity(intent);
+    }
+
+    private String getFullFilePathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri,  proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     public class DetectTextTask extends AsyncTask<Void, Void, Integer> {
