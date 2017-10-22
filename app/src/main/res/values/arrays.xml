@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_values">
+        <item>hr</item>
+        <item>en</item>
+        <item>de</item>
+        <item>sr</item>
+    </string-array>
+
+    <string-array name="language_labels">
+        <item>Croatian</item>
+        <item>English</item>
+        <item>German</item>
+        <item>Serbian</item>
+    </string-array>
+</resources>
