@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -25,7 +27,9 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -67,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     private LinearLayout mProcessBtn;
     private RecyclerView mPagesRecyclerView;
     private TextView mPagesEmptyText;
+    private Spinner mLanguageFromSpinner;
+    private Spinner mLanguageToSpinner;
 
     private PagesRecyclerViewAdapter mPagesAdapter;
 
@@ -92,11 +99,37 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         }
     };
 
+    private AdapterView.OnItemSelectedListener mOnLanguageChangedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            SharedPreferences.Editor prefEditor = PreferenceManager
+                    .getDefaultSharedPreferences(MainActivity.this).edit();
+            String[] languages = getResources().getStringArray(R.array.language_values);
+            String value = languages[position];
+            if (parent == mLanguageFromSpinner) {
+                prefEditor.putString("language_from", value);
+            } else if (parent == mLanguageToSpinner) {
+                prefEditor.putString("language_to", value);
+            }
+            prefEditor.apply();
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            return;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
+
+        mLanguageFromSpinner = findViewById(R.id.activity_main_language_from_spinner);
+        mLanguageToSpinner = findViewById(R.id.activity_main_language_to_spinner);
+        mLanguageFromSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
+        mLanguageToSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
 
         mCameraBtn = findViewById(R.id.activity_main_btn_camera);
         mCameraBtn.setOnClickListener(view -> onCameraClicked());
@@ -116,8 +149,21 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         mPagesAdapter = new PagesRecyclerViewAdapter(this, DocumentHolder.getInstance().getAllPages(), this);
         mPagesRecyclerView.setAdapter(mPagesAdapter);
 
+        loadLanguagePreferences();
+
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(
                 mBroadcastReceiver, new IntentFilter("new-page"));
+    }
+
+    private void loadLanguagePreferences() {
+        List<String> languageValues = Arrays.asList(getResources().getStringArray(R.array.language_values));
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        String fromVal = pref.getString("language_from", getString(R.string.language_from_default_value));
+        String toVal = pref.getString("language_to", getString(R.string.language_to_default_value));
+        int fromIndex = languageValues.indexOf(fromVal);
+        int toIndex = languageValues.indexOf(toVal);
+        mLanguageFromSpinner.setSelection(fromIndex);
+        mLanguageToSpinner.setSelection(toIndex);
     }
 
     @Override

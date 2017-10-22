@@ -21,4 +21,7 @@
     <string name="dialog_share_duration_month">30 days</string>
     <string name="dialog_share_submit_btn">Submit</string>
     <string name="dialog_share_cancel_btn">Cancel</string>
+
+    <string name="language_from_default_value">de</string>
+    <string name="language_to_default_value">en</string>
 </resources>
