@@ -195,11 +195,14 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
 
         String cameraPerm = Manifest.permission.CAMERA;
         String writeStoragePerm = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        String locationPerm = Manifest.permission.ACCESS_FINE_LOCATION;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 (checkSelfPermission(cameraPerm) != PackageManager.PERMISSION_GRANTED ||
-                 checkSelfPermission(writeStoragePerm) != PackageManager.PERMISSION_GRANTED))
+                 checkSelfPermission(writeStoragePerm) != PackageManager.PERMISSION_GRANTED ||
+                 checkSelfPermission(locationPerm) != PackageManager.PERMISSION_GRANTED))
         {
-            ActivityCompat.requestPermissions(this, new String[]{cameraPerm, writeStoragePerm}, REQUEST_CAMERA_PERMISSION);
+            ActivityCompat.requestPermissions(this, new String[]{cameraPerm, writeStoragePerm, locationPerm},
+                    REQUEST_CAMERA_PERMISSION);
         } else {
             onUseCamera();
         }
@@ -265,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(fullFilePath, options);
-                DocumentHolder.getInstance().addPage(new Page(bitmap));
+                DocumentHolder.getInstance().addPage(new Page(bitmap, new Location(43.3209, 21.8957)));
                 Intent intent = new Intent(MainActivity.this, CornersActivity.class);
                 intent.putExtra("camera", false);
                 startActivity(intent);

@@ -164,8 +164,9 @@ public class CornersActivity extends AppCompatActivity {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
                 mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
+                Location lastPageLoc = mDocumentHolder.getLastPage().getLocation();
                 mDocumentHolder.removeLastPage();
-                mDocumentHolder.addPage(new Page(mBitmap));
+                mDocumentHolder.addPage(new Page(mBitmap, lastPageLoc));
             }
         }
 
@@ -246,8 +247,9 @@ public class CornersActivity extends AppCompatActivity {
             transformMat.release();
             imageMat.release();
 
+            Location location = DocumentHolder.getInstance().getLastPage().getLocation();
             DocumentHolder.getInstance().removeLastPage();
-            DocumentHolder.getInstance().addPage(new Page(image));
+            DocumentHolder.getInstance().addPage(new Page(image, location));
             return image;
         }
 

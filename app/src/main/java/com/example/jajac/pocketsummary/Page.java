@@ -16,11 +16,14 @@ public class Page {
     private int mState = STATE_PENDING;
     private Bitmap mBitmap;
 
+    private Location mLocation;
+
     private List<TextPiece> mBlocks;
     private List<TextPiece> mTranslatedBlocks = new ArrayList<>();
 
-    public Page(Bitmap bitmap) {
+    public Page(Bitmap bitmap, Location location) {
         mBitmap = bitmap;
+        mLocation = location;
     }
 
     public int getState() {
@@ -37,6 +40,14 @@ public class Page {
 
     public void setBitmap(Bitmap mBitmap) {
         this.mBitmap = mBitmap;
+    }
+
+    public Location getLocation() {
+        return mLocation;
+    }
+
+    public void setLocation(Location location) {
+        this.mLocation = location;
     }
 
     public int getWidth() {
