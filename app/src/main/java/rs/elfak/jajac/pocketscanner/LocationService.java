@@ -17,7 +17,7 @@ public class LocationService extends Service {
 
     private static final String TAG = "LocationService";
 
-    public static final String LOCATION_RECEIVED_INTENT_ACTION = "com.elfak.jajac.pocketscanner.location-received";
+    public static final String LOCATION_RECEIVED_INTENT_ACTION = "rs.elfak.jajac.pocketscanner.location-received";
 
     private final IBinder mLocalBinder = new LocalBinder();
 

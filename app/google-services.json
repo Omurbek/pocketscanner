@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "325923801657",
+    "firebase_url": "https://diplomski-78b00.firebaseio.com",
+    "project_id": "diplomski-78b00",
+    "storage_bucket": "diplomski-78b00.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325923801657:android:83a47763f71dd038",
+        "android_client_info": {
+          "package_name": "rs.elfak.jajac.pocketscanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "325923801657-6hujmbdjso2k9tmthfunepiahn1i0v49.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "rs.elfak.jajac.pocketscanner",
+            "certificate_hash": "4ddad7d698ce680d7a4b57fb75a2b9df470c89fc"
+          }
+        },
+        {
+          "client_id": "325923801657-brvoqf7e6c3h536eoq04d038j35aca1l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6LAsAt9o8Wo76OHxTTwGtiPs_oAdLARQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325923801657-brvoqf7e6c3h536eoq04d038j35aca1l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.elfak.jajac.pocketscanner", appContext.getPackageName());
+        assertEquals("rs.elfak.jajac.pocketscanner", appContext.getPackageName());
     }
 }
