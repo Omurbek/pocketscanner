@@ -8,8 +8,11 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jajac.pocketscanner.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class PageActivity extends AppCompatActivity {
 
@@ -18,6 +21,8 @@ public class PageActivity extends AppCompatActivity {
     private TextView mTextView;
     private LinearLayout mShareBtn;
     private AlertDialog mSubmitDg;
+
+    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +60,24 @@ public class PageActivity extends AppCompatActivity {
     }
 
     private void onSubmitClicked() {
+        int daysRelevant = getDaysRelevant();
+        Page page = DocumentHolder.getInstance().getPage(mPageIndex);
+        page.setDaysRelevant(daysRelevant);
+
+        String newDocumentKey = mDatabase.child("documents").push().getKey();
+        mDatabase.child("documents").child(newDocumentKey).setValue(page).addOnSuccessListener(aVoid -> {
+            Toast.makeText(PageActivity.this, "Document shared!", Toast.LENGTH_SHORT).show();
+        });
+
+        mSubmitDg.dismiss();
+    }
+
+    private int getDaysRelevant() {
         RadioGroup radioGroup = mSubmitDg.findViewById(R.id.dialog_share_radio_group);
         int checkedResId = radioGroup.getCheckedRadioButtonId();
         RadioButton radioButton = mSubmitDg.findViewById(checkedResId);
 
-        int durationInDays = (int) radioButton.getTag();
-
-        mSubmitDg.dismiss();
+        return Integer.valueOf((String) radioButton.getTag());
     }
 
 }

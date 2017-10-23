@@ -2,6 +2,8 @@ package rs.elfak.jajac.pocketscanner;
 
 import android.graphics.Bitmap;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +16,11 @@ public class Page {
     public static final int STATE_FINISHED = 3;
 
     private int mState = STATE_PENDING;
+
     private Bitmap mBitmap;
 
     private Location mLocation;
+    private int mDaysRelevant;
 
     private List<TextPiece> mBlocks;
     private List<TextPiece> mTranslatedBlocks = new ArrayList<>();
@@ -26,6 +30,7 @@ public class Page {
         mLocation = location;
     }
 
+    @Exclude
     public int getState() {
         return mState;
     }
@@ -34,6 +39,7 @@ public class Page {
         this.mState = mState;
     }
 
+    @Exclude
     public Bitmap getBitmap() {
         return mBitmap;
     }
@@ -50,14 +56,25 @@ public class Page {
         this.mLocation = location;
     }
 
+    public int getDaysRelevant() {
+        return mDaysRelevant;
+    }
+
+    public void setDaysRelevant(int daysRelevant) {
+        this.mDaysRelevant = daysRelevant;
+    }
+
+    @Exclude
     public int getWidth() {
         return mBitmap.getWidth();
     }
 
+    @Exclude
     public int getHeight() {
         return mBitmap.getHeight();
     }
 
+    @Exclude
     public List<TextPiece> getBlocks() {
         return mBlocks;
     }
@@ -66,6 +83,7 @@ public class Page {
         this.mBlocks = blocks;
     }
 
+    @Exclude
     public String getFullText() {
         String result = null;
         if (mBlocks != null && mBlocks.size() > 0) {
