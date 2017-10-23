@@ -2,6 +2,7 @@
     <string name="app_name">PocketSummary</string>
 
     <string name="activity_main_pages_empty">No pages to process</string>
+    <string name="activity_main_map_text">Explore</string>
     <string name="activity_main_camera_text">Capture</string>
     <string name="activity_main_gallery_text">Choose</string>
     <string name="activity_main_process_text">Process</string>

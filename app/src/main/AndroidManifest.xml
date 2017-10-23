@@ -37,7 +37,15 @@
             android:name="rs.elfak.jajac.pocketscanner.PageActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+
         <service android:name="rs.elfak.jajac.pocketscanner.LocationService"/>
+
+        <activity android:name="rs.elfak.jajac.pocketscanner.MapActivity">
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyA_K_tTDSmxnpIV7CsTrBAhuqtTPAQPgfk"/>
     </application>
 
 </manifest>

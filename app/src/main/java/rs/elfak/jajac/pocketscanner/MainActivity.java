@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     private static final int REQUEST_STORAGE_PERMISSION = 2;
     private static final int REQUEST_CHOOSE_FROM_GALLERY = 3;
 
+    private LinearLayout mMapBtn;
     private LinearLayout mCameraBtn;
     private LinearLayout mGalleryBtn;
     private LinearLayout mProcessBtn;
@@ -128,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         mLanguageFromSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
         mLanguageToSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
 
+        mMapBtn = findViewById(R.id.activity_main_btn_map);
+        mMapBtn.setOnClickListener(view -> onMapClicked());
+
         mCameraBtn = findViewById(R.id.activity_main_btn_camera);
         mCameraBtn.setOnClickListener(view -> onCameraClicked());
 
@@ -183,6 +187,11 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
             Log.d(TAG, "Internal OpenCV found. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+    }
+
+    private void onMapClicked() {
+        Intent intent = new Intent(MainActivity.this, MapActivity.class);
+        startActivity(intent);
     }
 
     private void onCameraClicked() {

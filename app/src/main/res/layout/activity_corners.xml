@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context="com.example.jajac.pocketscanner.rs.example.jajac.pocketscanner.CornersActivity">
+    tools:context="rs.elfak.jajac.pocketscanner.CornersActivity">
 
     <ImageView
         android:id="@+id/activity_corners_img"
