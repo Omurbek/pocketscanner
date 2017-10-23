@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context="com.example.jajac.pocketsummary.CameraActivity">
+    tools:context="com.example.jajac.pocketscanner.rs.example.jajac.pocketscanner.CameraActivity">
 
     <io.fotoapparat.view.CameraView
         android:id="@+id/activity_camera_camera_view"

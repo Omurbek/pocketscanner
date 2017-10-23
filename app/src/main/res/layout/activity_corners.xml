@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context="com.example.jajac.pocketsummary.CornersActivity">
+    tools:context="com.example.jajac.pocketscanner.rs.example.jajac.pocketscanner.CornersActivity">
 
     <ImageView
         android:id="@+id/activity_corners_img"
@@ -16,7 +16,7 @@
         android:layout_gravity="center"
         android:adjustViewBounds="true"/>
 
-    <com.example.jajac.pocketsummary.CornersView
+    <rs.elfak.jajac.pocketscanner.CornersView
         android:id="@+id/activity_corners_corners_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

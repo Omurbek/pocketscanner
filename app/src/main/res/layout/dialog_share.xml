@@ -19,12 +19,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:layout_below="@id/dialog_share_duration_text">
+        android:layout_below="@id/dialog_share_duration_text"
+        android:checkedButton="@+id/dialog_share_default_btn">
 
         <RadioButton
+            android:id="@+id/dialog_share_default_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
             android:text="@string/dialog_share_duration_day"
             android:tag="1"/>
 

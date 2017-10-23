@@ -1,4 +1,4 @@
-package com.example.jajac.pocketsummary;
+package rs.elfak.jajac.pocketscanner;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.example.jajac.pocketsummary;
+package rs.elfak.jajac.pocketscanner;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -33,6 +33,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.jajac.pocketscanner.R;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -41,14 +42,10 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -104,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             SharedPreferences.Editor prefEditor = PreferenceManager
                     .getDefaultSharedPreferences(MainActivity.this).edit();
-            String[] languages = getResources().getStringArray(R.array.language_values);
+            String[] languages = getResources().getStringArray(com.example.jajac.pocketscanner.R.array.language_values);
             String value = languages[position];
             if (parent == mLanguageFromSpinner) {
                 prefEditor.putString("language_from", value);

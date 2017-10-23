@@ -1,4 +1,4 @@
-package com.example.jajac.pocketsummary;
+package rs.elfak.jajac.pocketscanner;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import com.example.jajac.pocketscanner.R;
 
 import java.util.ArrayList;
 import java.util.List;

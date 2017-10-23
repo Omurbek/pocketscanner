@@ -1,15 +1,15 @@
-package com.example.jajac.pocketsummary;
+package rs.elfak.jajac.pocketscanner;
 
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.jajac.pocketscanner.R;
 
 public class PageActivity extends AppCompatActivity {
 

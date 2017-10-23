@@ -1,4 +1,4 @@
-package com.example.jajac.pocketsummary;
+package rs.elfak.jajac.pocketscanner;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,6 +11,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.jajac.pocketscanner.R;
 
 import java.util.Collection;
 import java.util.Collections;
