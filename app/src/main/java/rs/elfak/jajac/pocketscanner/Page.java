@@ -83,13 +83,12 @@ public class Page {
         this.mBlocks = blocks;
     }
 
-    @Exclude
-    public String getFullText() {
+    public String getOriginal() {
         String result = null;
         if (mBlocks != null && mBlocks.size() > 0) {
             result = "";
             for (int i = 0; i < mBlocks.size() - 1; i++) {
-                result += mBlocks.get(i).getText() + "\n\n\n";
+                result += mBlocks.get(i).getText() + "\n\n";
             }
             result += mBlocks.get(mBlocks.size() - 1).getText();
         }
@@ -97,7 +96,7 @@ public class Page {
     }
 
     public void setTranslation(String translation) {
-        String[] pieces = translation.split("\n\n\n");
+        String[] pieces = translation.split("\n\n");
         for (int i = 0; i < pieces.length; i++) {
             mTranslatedBlocks.add(new TextPiece(mBlocks.get(i).getBoundingBox(), pieces[i]));
         }

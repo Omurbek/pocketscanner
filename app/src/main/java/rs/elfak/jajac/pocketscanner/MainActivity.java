@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     .appendPath("V2")
                     .appendPath("Http.svc")
                     .appendPath("Translate")
-                    .appendQueryParameter("text", DocumentHolder.getInstance().getPage(mPageIndex).getFullText())
+                    .appendQueryParameter("text", DocumentHolder.getInstance().getPage(mPageIndex).getOriginal())
                     .appendQueryParameter("from", "sr")
                     .appendQueryParameter("to", "en");
 
