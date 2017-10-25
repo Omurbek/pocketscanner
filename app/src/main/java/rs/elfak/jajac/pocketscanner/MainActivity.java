@@ -230,7 +230,10 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     private void onProcessClicked() {
         DocumentHolder docHolder = DocumentHolder.getInstance();
         for (int i = 0; i < docHolder.getPageCount(); i++) {
-            new DetectTextTask(i).execute();
+            String[] langValues = getResources().getStringArray(R.array.language_values);
+            String fromLangVal = langValues[mLanguageFromSpinner.getSelectedItemPosition()];
+            String toLangVal = langValues[mLanguageToSpinner.getSelectedItemPosition()];
+            new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
         }
     }
 
@@ -310,15 +313,19 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         }
     }
 
-    public class DetectTextTask extends AsyncTask<Void, Void, Integer> {
+    public class DetectTextAndTranslateTask extends AsyncTask<Void, Void, Integer> {
 
         public static final int TEXT_ERROR = 0;
         public static final int TEXT_OK = 1;
 
         private int mPageIndex;
+        private String mFromLang;
+        private String mToLang;
 
-        public DetectTextTask(int index) {
+        public DetectTextAndTranslateTask(int index, String fromLang, String toLang) {
             mPageIndex = index;
+            mFromLang = fromLang;
+            mToLang = toLang;
         }
 
         @Override
@@ -378,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                 DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_ERROR);
                 mPagesAdapter.notifyItemChanged(mPageIndex);
             } else if (status == TEXT_OK) {
-                TranslateTask translateTask = new TranslateTask(mPageIndex);
+                TranslateTask translateTask = new TranslateTask(mPageIndex, mFromLang, mToLang);
                 translateTask.execute();
             }
         }
@@ -387,9 +394,13 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     public class TranslateTask extends AsyncTask<Void, Void, Void> {
 
         private int mPageIndex;
+        private String mFromLang;
+        private String mToLang;
 
-        public TranslateTask(int index) {
+        public TranslateTask(int index, String fromLang, String toLang) {
             mPageIndex = index;
+            mFromLang = fromLang;
+            mToLang = toLang;
         }
 
         @Override
@@ -408,8 +419,8 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     .appendPath("Http.svc")
                     .appendPath("Translate")
                     .appendQueryParameter("text", DocumentHolder.getInstance().getPage(mPageIndex).getOriginal())
-                    .appendQueryParameter("from", "sr")
-                    .appendQueryParameter("to", "en");
+                    .appendQueryParameter("from", mFromLang)
+                    .appendQueryParameter("to", mToLang);
 
             String urlString = builder.build().toString();
             URL url = null;
