@@ -24,6 +24,12 @@ public class Page {
 
     private List<TextPiece> mBlocks;
     private List<TextPiece> mTranslatedBlocks = new ArrayList<>();
+    private String mOriginal;
+    private String mTranslation;
+
+    public Page() {
+
+    }
 
     public Page(Bitmap bitmap, Location location) {
         mBitmap = bitmap;
@@ -79,39 +85,43 @@ public class Page {
         return mBlocks;
     }
 
-    public void setBlocks(List<TextPiece> blocks) {
-        this.mBlocks = blocks;
-    }
-
-    public String getOriginal() {
+    public void setBlocksAndMakeOriginal(List<TextPiece> blocks) {
         String result = null;
-        if (mBlocks != null && mBlocks.size() > 0) {
+        if (blocks != null && blocks.size() > 0) {
+            this.mBlocks = blocks;
             result = "";
             for (int i = 0; i < mBlocks.size() - 1; i++) {
                 result += mBlocks.get(i).getText() + "\n\n";
             }
             result += mBlocks.get(mBlocks.size() - 1).getText();
         }
-        return result;
+        mOriginal = result;
+    }
+
+    public String getOriginal() {
+        return mOriginal;
+    }
+
+    public void setOriginal(String original) {
+        this.mOriginal = original;
+    }
+
+    public void setTranslationTextAndBlocks(String translation) {
+        mTranslation = translation;
+        if (mBlocks != null) {
+            String[] pieces = translation.split("\n\n");
+            for (int i = 0; i < pieces.length; i++) {
+                mTranslatedBlocks.add(new TextPiece(mBlocks.get(i).getBoundingBox(), pieces[i]));
+            }
+        }
     }
 
     public void setTranslation(String translation) {
-        String[] pieces = translation.split("\n\n");
-        for (int i = 0; i < pieces.length; i++) {
-            mTranslatedBlocks.add(new TextPiece(mBlocks.get(i).getBoundingBox(), pieces[i]));
-        }
+        this.mTranslation = translation;
     }
 
     public String getTranslation() {
-        String fullText = "";
-
-        if (mTranslatedBlocks.size() > 0) {
-            for (int i = 0; i < mTranslatedBlocks.size() - 1; i++) {
-                fullText += mTranslatedBlocks.get(i).getText() + "\n\n";
-            }
-            fullText += mTranslatedBlocks.get(mTranslatedBlocks.size() - 1).getText();
-        }
-        return fullText;
+        return mTranslation;
     }
 
 }

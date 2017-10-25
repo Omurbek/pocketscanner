@@ -229,11 +229,13 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
 
     private void onProcessClicked() {
         DocumentHolder docHolder = DocumentHolder.getInstance();
+        String[] langValues = getResources().getStringArray(R.array.language_values);
+        String fromLangVal = langValues[mLanguageFromSpinner.getSelectedItemPosition()];
+        String toLangVal = langValues[mLanguageToSpinner.getSelectedItemPosition()];
         for (int i = 0; i < docHolder.getPageCount(); i++) {
-            String[] langValues = getResources().getStringArray(R.array.language_values);
-            String fromLangVal = langValues[mLanguageFromSpinner.getSelectedItemPosition()];
-            String toLangVal = langValues[mLanguageToSpinner.getSelectedItemPosition()];
-            new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
+            if (docHolder.getPage(i).getState() == Page.STATE_PENDING) {
+                new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
+            }
         }
     }
 
@@ -294,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     @Override
     public void onPageClicked(int pageIndex) {
         Intent intent = new Intent(MainActivity.this, PageActivity.class);
-        intent.putExtra("page", pageIndex);
+        intent.putExtra("page-index", pageIndex);
         startActivity(intent);
     }
 
@@ -445,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
                         String fullResult = streamToString(connection.getInputStream(), 10000);
                         fullResult = fullResult.substring(68, fullResult.length() - 9);
-                        DocumentHolder.getInstance().getPage(mPageIndex).setTranslation(fullResult);
+                        DocumentHolder.getInstance().getPage(mPageIndex).setTranslationTextAndBlocks(fullResult);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

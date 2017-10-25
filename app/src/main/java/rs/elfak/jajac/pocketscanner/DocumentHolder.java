@@ -56,7 +56,7 @@ class DocumentHolder {
     }
 
     public void setPageBlocks(int index, List<TextPiece> blocks) {
-        mPages.get(index).setBlocks(blocks);
+        mPages.get(index).setBlocksAndMakeOriginal(blocks);
     }
 
     public List<TextPiece> getPageBlocks(int index) {

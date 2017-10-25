@@ -4,11 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="rs.elfak.jajac.pocketscanner.MapActivity">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/activity_map_mapview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+        <com.xw.repo.BubbleSeekBar
+            android:id="@+id/activity_map_radius"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="80dp"
+            app:bsb_min="1"
+            app:bsb_max="20"
+            app:bsb_section_text_position="bottom_sides"
+            app:bsb_show_progress_in_float="true"
+            app:bsb_bubble_text_color="@color/colorPrimaryDark"/>
 
 </FrameLayout>
