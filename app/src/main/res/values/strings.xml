@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PocketSummary</string>
+    <string name="app_name">Pocket Scanner</string>
 
     <string name="activity_main_pages_empty">No pages to process</string>
     <string name="activity_main_map_text">Explore</string>

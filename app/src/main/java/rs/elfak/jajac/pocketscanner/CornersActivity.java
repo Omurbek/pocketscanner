@@ -74,7 +74,7 @@ public class CornersActivity extends AppCompatActivity {
         mBackBtn.setOnClickListener(view -> onBack());
         mFinishBtn.setOnClickListener(view -> onFinish());
 
-        mDocumentFinder = new DocumentFinder(9, 0.04, true);
+        mDocumentFinder = new DocumentFinder(9, 0.02, true);
         mDocumentHolder = DocumentHolder.getInstance();
         mBitmap = mDocumentHolder.getLastPageBitmap();
 

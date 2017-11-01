@@ -34,7 +34,10 @@ public class DocumentFinder {
         documentCorners.add(new Point(bitmap.getWidth(), 0));
         documentCorners.add(new Point(bitmap.getWidth(), bitmap.getHeight()));
         documentCorners.add(new Point(0, bitmap.getHeight()));
+
         Mat image = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC4);
+        Mat blurred = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC4);
+        Mat gray = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC1);
         Mat edges = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC1);
         Mat hierarchy = new Mat();
         List<MatOfPoint> contourPoints = new ArrayList<>();
@@ -42,9 +45,9 @@ public class DocumentFinder {
 
         Utils.bitmapToMat(bitmap, image);
 
-//        Photo.fastNlMeansDenoising(image, image);
-        Imgproc.medianBlur(image, image, mBlur);
-        Imgproc.Canny(image, edges, 75, 200);
+        Imgproc.medianBlur(image, blurred, mBlur);
+        Imgproc.cvtColor(blurred, gray, Imgproc.COLOR_RGBA2GRAY);
+        Imgproc.Canny(gray, edges, 10, 20, 3, false);
         Imgproc.findContours(edges, contourPoints, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         if (contourPoints.size() != 0) {
@@ -66,6 +69,8 @@ public class DocumentFinder {
         }
 
         image.release();
+        blurred.release();
+        gray.release();
         edges.release();
         hierarchy.release();
         releaseContourList(contourPoints);

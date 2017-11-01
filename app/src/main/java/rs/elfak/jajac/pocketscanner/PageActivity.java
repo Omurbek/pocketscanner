@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -55,7 +56,7 @@ public class PageActivity extends AppCompatActivity {
 
     private void showTranslation() {
         Page page = DocumentHolder.getInstance().getPage(mPageIndex);
-        mTextView.setText(page.getTranslation());
+        setTranslationText(page.getTranslation());
     }
 
     private void getPageAndShowTranslation() {
@@ -63,7 +64,7 @@ public class PageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Page page = dataSnapshot.getValue(Page.class);
-                mTextView.setText(page.getTranslation());
+                setTranslationText(page.getTranslation());
             }
 
             @Override
@@ -71,6 +72,10 @@ public class PageActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void setTranslationText(String text) {
+        mTextView.setText(text);
     }
 
     private void onShareClicked() {
