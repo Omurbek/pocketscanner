@@ -34,7 +34,7 @@
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
-            android:name="rs.elfak.jajac.pocketscanner.PageActivity"
+            android:name="rs.elfak.jajac.pocketscanner.DocumentActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 

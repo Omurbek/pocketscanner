@@ -19,10 +19,10 @@ public class LocationService extends Service {
 
     public static final String LOCATION_RECEIVED_INTENT_ACTION = "rs.elfak.jajac.pocketscanner.location-received";
 
-    private final IBinder mLocalBinder = new LocalBinder();
+    private final IBinder localBinder = new LocalBinder();
 
-    private FusedLocationProviderClient mFusedLocationClient;
-    private LocationCallback mLocationCallback;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
 
     @Override
@@ -30,8 +30,8 @@ public class LocationService extends Service {
         super.onCreate();
         // Called when the service is bound for the first time,
         // we can start timed operations here
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(LocationService.this);
-        mLocationCallback = new LocationCallback() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(LocationService.this);
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 android.location.Location location = locationResult.getLastLocation();
@@ -47,21 +47,21 @@ public class LocationService extends Service {
         // Not handling the permission exception here because this service shouldn't
         // ever be started and bound without location permission
         try {
-            mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
         } catch (SecurityException e) {
             e.printStackTrace();
         }
     }
 
     public IBinder onBind(Intent intent) {
-        return mLocalBinder;
+        return localBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         // Called when the last bound Activity is unbound from
         // this service, so we stop timed operations here
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        fusedLocationClient.removeLocationUpdates(locationCallback);
         return super.onUnbind(intent);
     }
 

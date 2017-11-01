@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
@@ -36,24 +39,24 @@ public class CameraActivity extends AppCompatActivity {
 
     private static final String TAG = "CameraActivity";
 
-    private CameraView mCameraView;
-    private FloatingActionButton mBackBtn;
-    private FloatingActionButton mCaptureBtn;
-    private FloatingActionButton mFinishBtn;
+    private CameraView cameraView;
+    private FloatingActionButton backBtn;
+    private FloatingActionButton captureBtn;
+    private FloatingActionButton finishBtn;
 
-    private Fotoapparat mFotoapparat;
-    private DocumentHolder mDocumentHolder;
+    private Fotoapparat fotoapparat;
+    private DocumentsHolder documentsHolder;
 
-    private boolean mLocationUpdatesBound;
-    private LocationService mLocationService;
-    private Location mLocation;
+    private boolean isLocationUpdatesBound;
+    private LocationService locationService;
+    private Location userLocation;
 
-    private BroadcastReceiver mLocationReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver userLocationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             double latitude = intent.getDoubleExtra("latitude", 0);
             double longitude = intent.getDoubleExtra("longitude", 0);
-            mLocation = new Location(latitude, longitude);
+            userLocation = new Location(latitude, longitude);
         }
     };
 
@@ -62,12 +65,12 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        mCameraView = findViewById(R.id.activity_camera_camera_view);
-        mBackBtn = findViewById(R.id.activity_camera_back_btn);
-        mCaptureBtn = findViewById(R.id.activity_camera_capture_btn);
-        mFinishBtn = findViewById(R.id.activity_camera_finish_btn);
+        cameraView = findViewById(R.id.activity_camera_camera_view);
+        backBtn = findViewById(R.id.activity_camera_back_btn);
+        captureBtn = findViewById(R.id.activity_camera_capture_btn);
+        finishBtn = findViewById(R.id.activity_camera_finish_btn);
 
-        mFotoapparat = Fotoapparat.with(this).into(mCameraView)
+        fotoapparat = Fotoapparat.with(this).into(cameraView)
                 .previewScaleType(ScaleType.CENTER_INSIDE)
                 .previewSize(this::getPreviewSize)
                 .photoSize(this::getPhotoSize)
@@ -83,20 +86,20 @@ public class CameraActivity extends AppCompatActivity {
                         torch()
                 )).build();
 
-        mDocumentHolder = DocumentHolder.getInstance();
+        documentsHolder = DocumentsHolder.getInstance();
 
-        mBackBtn.setOnClickListener(view -> onBack());
-        mCaptureBtn.setOnClickListener(view -> onCapture());
-        mFinishBtn.setOnClickListener(view -> onFinish());
+        backBtn.setOnClickListener(view -> onBack());
+        captureBtn.setOnClickListener(view -> onCapture());
+        finishBtn.setOnClickListener(view -> onFinish());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mFotoapparat.start();
+        fotoapparat.start();
 
         Intent locationUpdateIntent = new Intent(CameraActivity.this, LocationService.class);
-        bindService(locationUpdateIntent, mLocationUpdatesConnection, Context.BIND_AUTO_CREATE);
+        bindService(locationUpdateIntent, locationUpdatesConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -104,8 +107,8 @@ public class CameraActivity extends AppCompatActivity {
         super.onResume();
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(CameraActivity.this);
-        // Register a receiver for location updates
-        localBroadcastManager.registerReceiver(mLocationReceiver,
+        // Register a receiver for userLocation updates
+        localBroadcastManager.registerReceiver(userLocationReceiver,
                 new IntentFilter(LocationService.LOCATION_RECEIVED_INTENT_ACTION));
     }
 
@@ -114,18 +117,17 @@ public class CameraActivity extends AppCompatActivity {
         super.onPause();
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(CameraActivity.this);
-        // Unregister the receiver for location updates
-        localBroadcastManager.unregisterReceiver(mLocationReceiver);
+        localBroadcastManager.unregisterReceiver(userLocationReceiver);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mFotoapparat.stop();
+        fotoapparat.stop();
 
-        if (mLocationUpdatesBound) {
-            unbindService(mLocationUpdatesConnection);
-            mLocationUpdatesBound = false;
+        if (isLocationUpdatesBound) {
+            unbindService(locationUpdatesConnection);
+            isLocationUpdatesBound = false;
         }
     }
 
@@ -134,15 +136,39 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void onCapture() {
-        PhotoResult photoResult = mFotoapparat.takePicture();
+        PhotoResult photoResult = fotoapparat.takePicture();
         photoResult
                 .toBitmap()
                 .whenAvailable(result -> {
-                    mDocumentHolder.addPage(new Page(result.bitmap, mLocation));
-                    Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
-                    intent.putExtra("camera", true);
-                    startActivity(intent);
+                    onReceivedBitmap(result.bitmap);
                 });
+    }
+
+    private void onReceivedBitmap(Bitmap bitmap) {
+        if (isDevicePortraitMode()) {
+            bitmap = getRotatedBitmap(bitmap);
+        }
+        documentsHolder.addDocument(new Document(bitmap, userLocation));
+        startCornersActivity();
+    }
+
+    private Bitmap getRotatedBitmap(Bitmap bitmap) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        return rotatedBitmap;
+    }
+
+    private void startCornersActivity() {
+        Intent intent = new Intent(CameraActivity.this, CornersActivity.class);
+        startActivity(intent);
+    }
+
+    private boolean isDevicePortraitMode() {
+        boolean isOrientationPortrait = getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
+
+        return isOrientationPortrait;
     }
     
     private void onFinish() {
@@ -159,17 +185,17 @@ public class CameraActivity extends AppCompatActivity {
         return Collections.max(sizes, (left, right) -> Integer.compare(left.width, right.width));
     }
 
-    private ServiceConnection mLocationUpdatesConnection = new ServiceConnection() {
+    private ServiceConnection locationUpdatesConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
-            mLocationService = binder.getService();
-            mLocationUpdatesBound = true;
+            locationService = binder.getService();
+            isLocationUpdatesBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mLocationUpdatesBound = false;
+            isLocationUpdatesBound = false;
         }
     };
 

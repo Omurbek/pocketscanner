@@ -96,7 +96,9 @@ public class CornersView extends FrameLayout {
     }
 
     public void setPoints(List<Point> points) {
+        points = getPointsWithPadding(points);
         float offset = topLeft.getWidth() / 2;
+
         topLeft.setX(points.get(0).x - offset);
         topLeft.setY(points.get(0).y - offset);
 
@@ -108,6 +110,27 @@ public class CornersView extends FrameLayout {
 
         bottomLeft.setX(points.get(3).x - offset);
         bottomLeft.setY(points.get(3).y - offset);
+    }
+
+    private List<Point> getPointsWithPadding(List<Point> points) {
+        float cornerRadius = topLeft.getWidth() / 2;
+        float right = mCornersView.getWidth() - cornerRadius;
+        float bottom = mCornersView.getHeight() - 4 * cornerRadius;
+        for (Point point : points) {
+            if (point.x < cornerRadius) {
+                point.x = (int) cornerRadius;
+            } else if (point.x > right) {
+                point.x = (int) right;
+            }
+
+            if (point.y < cornerRadius) {
+                point.y = (int) cornerRadius;
+            } else if (point.y > bottom) {
+                point.y = (int) bottom;
+            }
+        }
+
+        return points;
     }
 
     @Override

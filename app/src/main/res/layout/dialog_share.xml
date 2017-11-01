@@ -6,10 +6,42 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/dialog_share_duration_text"
+        android:id="@+id/dialog_share_type_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:textSize="18sp"
+        android:text="@string/dialog_share_type_text"/>
+
+    <RadioGroup
+        android:id="@+id/dialog_type_radio_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@id/dialog_share_type_text"
+        android:checkedButton="@+id/dialog_type_default_btn">
+
+        <RadioButton
+            android:id="@+id/dialog_type_default_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_share_type_information"
+            android:tag="0"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_share_type_warning"
+            android:tag="1"/>
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/dialog_share_duration_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialog_type_radio_group"
         android:textSize="18sp"
         android:text="@string/dialog_share_duration_text"/>
 

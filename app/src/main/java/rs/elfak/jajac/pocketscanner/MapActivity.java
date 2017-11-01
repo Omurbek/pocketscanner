@@ -11,8 +11,6 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.SeekBar;
-import android.widget.Toast;
 
 import com.example.jajac.pocketscanner.R;
 import com.firebase.geofire.GeoFire;
@@ -24,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -44,22 +43,22 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private static final String TAG = "MapActivity";
 
-    private GoogleMap mGoogleMap;
-    private MapView mMapView;
-    private Circle mCircle;
-    private BubbleSeekBar mRadiusSeekBar;
-    private float mRadius = 1.0f;
-    private Map<String, Marker> mMarkers = new HashMap<>();
+    private GoogleMap googleMap;
+    private MapView mapView;
+    private Circle circle;
+    private BubbleSeekBar radiusSeekBar;
+    private float radius = 1.0f;
+    private Map<String, Marker> markers = new HashMap<>();
 
-    private boolean mLocationUpdatesBound;
-    private LocationService mLocationService;
-    private Location mLocation;
+    private boolean isLocationUpdatesBound;
+    private LocationService locationService;
+    private Location userLocation;
 
-    DatabaseReference mDocumentsDb = FirebaseDatabase.getInstance().getReference("documents");
-    GeoFire mDocumentsGeoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("documentsGeoFire"));
-    GeoQuery mDocumentsGeoQuery;
+    DatabaseReference documentsDb = FirebaseDatabase.getInstance().getReference("documents");
+    GeoFire documentsGeoFire = new GeoFire(FirebaseDatabase.getInstance().getReference("documentsGeoFire"));
+    GeoQuery documentsGeoQuery;
 
-    private BroadcastReceiver mLocationReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             double latitude = intent.getDoubleExtra("latitude", 0);
@@ -68,13 +67,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     };
 
-    private OnProgressChangedListener mRadiusSeekbarChangeListener = new OnProgressChangedListener() {
+    private OnProgressChangedListener radiusSeekbarChangeListener = new OnProgressChangedListener() {
         @Override
         public void onProgressChanged(BubbleSeekBar bubbleSeekBar, int progress, float progressFloat) {
-            mRadius = progress;
-            if (mDocumentsGeoQuery != null) {
-                mCircle.setRadius(mRadius * 1000);
-                mDocumentsGeoQuery.setRadius(mRadius);
+            radius = progress;
+            if (documentsGeoQuery != null) {
+                circle.setRadius(radius * 1000);
+                documentsGeoQuery.setRadius(radius);
             }
         }
 
@@ -89,10 +88,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     };
 
-    private GeoQueryEventListener mDocumentsGeoQueryListener = new GeoQueryEventListener() {
+    private GeoQueryEventListener documentsGeoQueryListener = new GeoQueryEventListener() {
         @Override
         public void onKeyEntered(String key, GeoLocation location) {
-            addDocumentMarker(key, new Location(location.latitude, location.longitude));
+            onDocumentEntered(key);
         }
 
         @Override
@@ -121,21 +120,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        mRadiusSeekBar = findViewById(R.id.activity_map_radius);
-        mMapView = (MapView) findViewById(R.id.activity_map_mapview);
-        mMapView.onCreate(savedInstanceState);
-        mMapView.getMapAsync(this);
+        radiusSeekBar = findViewById(R.id.activity_map_radius);
+        mapView = findViewById(R.id.activity_map_mapview);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         MapsInitializer.initialize(MapActivity.this);
 
-        mGoogleMap = googleMap;
-        mGoogleMap.setOnMarkerClickListener(marker -> onMarkerClicked(marker));
+        this.googleMap = googleMap;
+        this.googleMap.setOnMarkerClickListener(marker -> onMarkerClicked(marker));
 
         try {
-            mGoogleMap.setMyLocationEnabled(true);
+            this.googleMap.setMyLocationEnabled(true);
         } catch (SecurityException e) {
             // Not handling the exception here because we receive locations from the service
             // that will only be enabled if we have location permission
@@ -152,47 +151,72 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void onNewLocation(Location location) {
         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
         GeoLocation geoLoc = new GeoLocation(location.getLatitude(), location.getLongitude());
-        if (mLocation == null) {
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 15.0f));
-            mCircle = mGoogleMap.addCircle(new CircleOptions()
+        if (userLocation == null) {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 15.0f));
+            circle = googleMap.addCircle(new CircleOptions()
                     .center(center)
-                    .radius(mRadius * 1000)
+                    .radius(radius * 1000)
                     .strokeWidth(10)
                     .strokeColor(Color.argb(80, 69, 90, 100))
                     .fillColor(Color.argb(40, 255, 171, 0))
             );
-            mDocumentsGeoQuery = mDocumentsGeoFire.queryAtLocation(geoLoc, mRadius);
-            mDocumentsGeoQuery.addGeoQueryEventListener(mDocumentsGeoQueryListener);
-            mRadiusSeekBar.setOnProgressChangedListener(mRadiusSeekbarChangeListener);
+            documentsGeoQuery = documentsGeoFire.queryAtLocation(geoLoc, radius);
+            documentsGeoQuery.addGeoQueryEventListener(documentsGeoQueryListener);
+            radiusSeekBar.setOnProgressChangedListener(radiusSeekbarChangeListener);
         } else {
-            mCircle.setCenter(center);
-            mDocumentsGeoQuery.setCenter(geoLoc);
+            circle.setCenter(center);
+            documentsGeoQuery.setCenter(geoLoc);
         }
-        mLocation = location;
+        userLocation = location;
     }
 
-    private void addDocumentMarker(String key, Location location) {
+    private void onDocumentEntered(String key) {
+        documentsDb.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Document doc = dataSnapshot.getValue(Document.class);
+                addDocumentMarker(key, doc);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void addDocumentMarker(String key, Document doc) {
+        double docLatitude = doc.getLocation().getLatitude();
+        double docLongitude = doc.getLocation().getLongitude();
         MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(new LatLng(location.getLatitude(), location.getLongitude()));
-        final Marker marker = mGoogleMap.addMarker(markerOptions);
+        markerOptions.position(new LatLng(docLatitude, docLongitude));
+        float markerColor = BitmapDescriptorFactory.HUE_AZURE;
+        if (doc.getType() == DocumentType.INFORMATION) {
+            markerColor = BitmapDescriptorFactory.HUE_AZURE;
+        } else if (doc.getType() == DocumentType.WARNING) {
+            markerColor = BitmapDescriptorFactory.HUE_RED;
+        }
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(markerColor));
+
+        Marker marker = googleMap.addMarker(markerOptions);
         marker.setTag(key);
-        mMarkers.put(key, marker);
+        markers.put(key, marker);
     }
 
     private void removeDocumentMarker(String key) {
-        mMarkers.remove(key);
+        markers.remove(key);
     }
 
     private void onOpenDocument(String key) {
-        Intent intent = new Intent(MapActivity.this, PageActivity.class);
-        intent.putExtra("page-key", key);
+        Intent intent = new Intent(MapActivity.this, DocumentActivity.class);
+        intent.putExtra("document-key", key);
         startActivity(intent);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mMapView.onStart();
+        mapView.onStart();
 
         Intent locationUpdateIntent = new Intent(MapActivity.this, LocationService.class);
         bindService(locationUpdateIntent, mLocationUpdatesConnection, Context.BIND_AUTO_CREATE);
@@ -201,68 +225,68 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        mMapView.onResume();
+        mapView.onResume();
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(MapActivity.this);
         // Register a receiver for location updates
-        localBroadcastManager.registerReceiver(mLocationReceiver,
+        localBroadcastManager.registerReceiver(locationReceiver,
                 new IntentFilter(LocationService.LOCATION_RECEIVED_INTENT_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mMapView.onPause();
+        mapView.onPause();
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(MapActivity.this);
         // Unregister the receiver for location updates
-        localBroadcastManager.unregisterReceiver(mLocationReceiver);
+        localBroadcastManager.unregisterReceiver(locationReceiver);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mMapView.onStop();
+        mapView.onStop();
 
-        if (mLocationUpdatesBound) {
+        if (isLocationUpdatesBound) {
             unbindService(mLocationUpdatesConnection);
-            mLocationUpdatesBound = false;
+            isLocationUpdatesBound = false;
         }
 
-        if (mDocumentsGeoQuery != null) {
-            mDocumentsGeoQuery.removeAllListeners();
+        if (documentsGeoQuery != null) {
+            documentsGeoQuery.removeAllListeners();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMapView.onDestroy();
+        mapView.onDestroy();
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mMapView.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mMapView.onLowMemory();
+        mapView.onLowMemory();
     }
 
     private ServiceConnection mLocationUpdatesConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
-            mLocationService = binder.getService();
-            mLocationUpdatesBound = true;
+            locationService = binder.getService();
+            isLocationUpdatesBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            mLocationUpdatesBound = false;
+            isLocationUpdatesBound = false;
         }
     };
 

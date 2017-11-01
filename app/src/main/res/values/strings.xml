@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Pocket Scanner</string>
 
-    <string name="activity_main_pages_empty">No pages to process</string>
+    <string name="activity_main_pages_empty">No documents to process</string>
     <string name="activity_main_map_text">Explore</string>
     <string name="activity_main_camera_text">Capture</string>
     <string name="activity_main_gallery_text">Choose</string>
@@ -15,6 +15,9 @@
 
     <string name="activity_page_share_text">Share</string>
 
+    <string name="dialog_share_type_text">What is this document?</string>
+    <string name="dialog_share_type_information">Information</string>
+    <string name="dialog_share_type_warning">Warning</string>
     <string name="dialog_share_duration_text">How long is this relevant?</string>
     <string name="dialog_share_duration_day">1 day</string>
     <string name="dialog_share_duration_days">3 days</string>
@@ -23,6 +26,6 @@
     <string name="dialog_share_submit_btn">Submit</string>
     <string name="dialog_share_cancel_btn">Cancel</string>
 
-    <string name="language_from_default_value">de</string>
+    <string name="language_from_default_value">sr</string>
     <string name="language_to_default_value">en</string>
 </resources>

@@ -56,7 +56,8 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 
-public class MainActivity extends AppCompatActivity implements PagesRecyclerViewAdapter.OnPageClickListener {
+public class MainActivity extends AppCompatActivity implements
+        DocumentsRecyclerViewAdapter.OnDocumentClickListener {
 
     public static final String TAG = "MainActivity";
 
@@ -64,18 +65,17 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     private static final int REQUEST_STORAGE_PERMISSION = 2;
     private static final int REQUEST_CHOOSE_FROM_GALLERY = 3;
 
-    private LinearLayout mMapBtn;
-    private LinearLayout mCameraBtn;
-    private LinearLayout mGalleryBtn;
-    private LinearLayout mProcessBtn;
-    private RecyclerView mPagesRecyclerView;
-    private TextView mPagesEmptyText;
-    private Spinner mLanguageFromSpinner;
-    private Spinner mLanguageToSpinner;
+    private LinearLayout exploreBtn;
+    private LinearLayout cameraBtn;
+    private LinearLayout galleryBtn;
+    private RecyclerView documentsRecyclerView;
+    private TextView documentsEmptyText;
+    private Spinner languageFromSpinner;
+    private Spinner languageToSpinner;
 
-    private PagesRecyclerViewAdapter mPagesAdapter;
+    private DocumentsRecyclerViewAdapter documentsAdapter;
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private BaseLoaderCallback loaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -93,20 +93,20 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mPagesAdapter.notifyDataSetChanged();
+            documentsAdapter.notifyDataSetChanged();
         }
     };
 
-    private AdapterView.OnItemSelectedListener mOnLanguageChangedListener = new AdapterView.OnItemSelectedListener() {
+    private AdapterView.OnItemSelectedListener onLanguageChangedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             SharedPreferences.Editor prefEditor = PreferenceManager
                     .getDefaultSharedPreferences(MainActivity.this).edit();
             String[] languages = getResources().getStringArray(com.example.jajac.pocketscanner.R.array.language_values);
             String value = languages[position];
-            if (parent == mLanguageFromSpinner) {
+            if (parent == languageFromSpinner) {
                 prefEditor.putString("language_from", value);
-            } else if (parent == mLanguageToSpinner) {
+            } else if (parent == languageToSpinner) {
                 prefEditor.putString("language_to", value);
             }
             prefEditor.apply();
@@ -124,36 +124,33 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
-        mLanguageFromSpinner = findViewById(R.id.activity_main_language_from_spinner);
-        mLanguageToSpinner = findViewById(R.id.activity_main_language_to_spinner);
-        mLanguageFromSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
-        mLanguageToSpinner.setOnItemSelectedListener(mOnLanguageChangedListener);
+        languageFromSpinner = findViewById(R.id.activity_main_language_from_spinner);
+        languageToSpinner = findViewById(R.id.activity_main_language_to_spinner);
+        languageFromSpinner.setOnItemSelectedListener(onLanguageChangedListener);
+        languageToSpinner.setOnItemSelectedListener(onLanguageChangedListener);
 
-        mMapBtn = findViewById(R.id.activity_main_btn_map);
-        mMapBtn.setOnClickListener(view -> onMapClicked());
+        exploreBtn = findViewById(R.id.activity_main_btn_map);
+        exploreBtn.setOnClickListener(view -> onExploreClicked());
 
-        mCameraBtn = findViewById(R.id.activity_main_btn_camera);
-        mCameraBtn.setOnClickListener(view -> onCameraClicked());
+        cameraBtn = findViewById(R.id.activity_main_btn_camera);
+        cameraBtn.setOnClickListener(view -> onCameraClicked());
 
-        mGalleryBtn = findViewById(R.id.activity_main_btn_gallery);
-        mGalleryBtn.setOnClickListener(view -> onGalleryClicked());
+        galleryBtn = findViewById(R.id.activity_main_btn_gallery);
+        galleryBtn.setOnClickListener(view -> onGalleryClicked());
 
-        mProcessBtn = findViewById(R.id.activity_main_btn_process);
-        mProcessBtn.setOnClickListener(view -> onProcessClicked());
+        documentsEmptyText = findViewById(R.id.activity_main_pages_empty);
 
-        mPagesEmptyText = findViewById(R.id.activity_main_pages_empty);
-
-        mPagesRecyclerView = findViewById(R.id.activity_main_pages_list);
+        documentsRecyclerView = findViewById(R.id.activity_main_pages_list);
         DividerItemDecoration divider = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
         divider.setDrawable(ContextCompat.getDrawable(this, R.drawable.list_divider));
-        mPagesRecyclerView.addItemDecoration(divider);
-        mPagesAdapter = new PagesRecyclerViewAdapter(this, DocumentHolder.getInstance().getAllPages(), this);
-        mPagesRecyclerView.setAdapter(mPagesAdapter);
+        documentsRecyclerView.addItemDecoration(divider);
+        documentsAdapter = new DocumentsRecyclerViewAdapter(this, DocumentsHolder.getInstance().getAllDocuments(), this);
+        documentsRecyclerView.setAdapter(documentsAdapter);
 
         loadLanguagePreferences();
 
         LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(
-                mBroadcastReceiver, new IntentFilter("new-page"));
+                mBroadcastReceiver, new IntentFilter("new-document"));
     }
 
     private void loadLanguagePreferences() {
@@ -163,17 +160,18 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         String toVal = pref.getString("language_to", getString(R.string.language_to_default_value));
         int fromIndex = languageValues.indexOf(fromVal);
         int toIndex = languageValues.indexOf(toVal);
-        mLanguageFromSpinner.setSelection(fromIndex);
-        mLanguageToSpinner.setSelection(toIndex);
+        languageFromSpinner.setSelection(fromIndex);
+        languageToSpinner.setSelection(toIndex);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (mPagesAdapter.getItemCount() > 0) {
-            mPagesEmptyText.setVisibility(View.GONE);
+        if (documentsAdapter.getItemCount() > 0) {
+            documentsEmptyText.setVisibility(View.GONE);
+            processNewDocuments();
         } else {
-            mPagesEmptyText.setVisibility(View.VISIBLE);
+            documentsEmptyText.setVisibility(View.VISIBLE);
         }
     }
 
@@ -182,14 +180,26 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization.");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_3_0, this, mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_3_0, this, loaderCallback);
         } else {
             Log.d(TAG, "Internal OpenCV found. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
 
-    private void onMapClicked() {
+    private void processNewDocuments() {
+        DocumentsHolder docHolder = DocumentsHolder.getInstance();
+        String[] langValues = getResources().getStringArray(R.array.language_values);
+        String fromLangVal = langValues[languageFromSpinner.getSelectedItemPosition()];
+        String toLangVal = langValues[languageToSpinner.getSelectedItemPosition()];
+        for (int i = 0; i < docHolder.getDocumentCount(); i++) {
+            if (docHolder.getDocumentAt(i).getState() != Document.STATE_FINISHED) {
+                new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
+            }
+        }
+    }
+
+    private void onExploreClicked() {
         Intent intent = new Intent(MainActivity.this, MapActivity.class);
         startActivity(intent);
     }
@@ -224,18 +234,6 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
             ActivityCompat.requestPermissions(this, new String[]{readStoragePerm, writeStoragePerm}, REQUEST_STORAGE_PERMISSION);
         } else {
             onUseGallery();
-        }
-    }
-
-    private void onProcessClicked() {
-        DocumentHolder docHolder = DocumentHolder.getInstance();
-        String[] langValues = getResources().getStringArray(R.array.language_values);
-        String fromLangVal = langValues[mLanguageFromSpinner.getSelectedItemPosition()];
-        String toLangVal = langValues[mLanguageToSpinner.getSelectedItemPosition()];
-        for (int i = 0; i < docHolder.getPageCount(); i++) {
-            if (docHolder.getPage(i).getState() == Page.STATE_PENDING) {
-                new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
-            }
         }
     }
 
@@ -279,9 +277,8 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeFile(fullFilePath, options);
-                DocumentHolder.getInstance().addPage(new Page(bitmap, new Location(43.3209, 21.8957)));
+                DocumentsHolder.getInstance().addDocument(new Document(bitmap, new Location(43.3209, 21.8957)));
                 Intent intent = new Intent(MainActivity.this, CornersActivity.class);
-                intent.putExtra("camera", false);
                 startActivity(intent);
             }
         }
@@ -294,9 +291,9 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
     }
 
     @Override
-    public void onPageClicked(int pageIndex) {
-        Intent intent = new Intent(MainActivity.this, PageActivity.class);
-        intent.putExtra("page-index", pageIndex);
+    public void onDocumentClicked(int docIndex) {
+        Intent intent = new Intent(MainActivity.this, DocumentActivity.class);
+        intent.putExtra("document-index", docIndex);
         startActivity(intent);
     }
 
@@ -320,21 +317,21 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         public static final int TEXT_ERROR = 0;
         public static final int TEXT_OK = 1;
 
-        private int mPageIndex;
-        private String mFromLang;
-        private String mToLang;
+        private int docIndex;
+        private String fromLang;
+        private String toLang;
 
         public DetectTextAndTranslateTask(int index, String fromLang, String toLang) {
-            mPageIndex = index;
-            mFromLang = fromLang;
-            mToLang = toLang;
+            docIndex = index;
+            this.fromLang = fromLang;
+            this.toLang = toLang;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_DETECTING_TEXT);
-            mPagesAdapter.notifyItemChanged(mPageIndex);
+            DocumentsHolder.getInstance().setDocumentState(docIndex, Document.STATE_DETECTING_TEXT);
+            documentsAdapter.notifyItemChanged(docIndex);
         }
 
         @Override
@@ -345,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     Toast.makeText(MainActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
                 }
 
-                Bitmap bitmap = DocumentHolder.getInstance().getPageBitmap(mPageIndex);
+                Bitmap bitmap = DocumentsHolder.getInstance().getDocumentBitmap(docIndex);
                 Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                 SparseArray<TextBlock> detectedBlocks = textRecognizer.detect(frame);
 
@@ -368,12 +365,12 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     return horizontalDiff;
                 });
 
-                List<TextPiece> textPieces = new ArrayList<>();
+                String detectedText = "";
                 for (TextBlock tb : textBlocks) {
-                    textPieces.add(new TextPiece(tb.getBoundingBox(), tb.getValue()));
+                    detectedText += tb.getValue() + "\n\n";
                 }
 
-                DocumentHolder.getInstance().setPageBlocks(mPageIndex, textPieces);
+                DocumentsHolder.getInstance().setDocumentText(docIndex, detectedText);
                 return TEXT_OK;
             } finally {
                 textRecognizer.release();
@@ -384,10 +381,10 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         protected void onPostExecute(Integer status) {
             super.onPostExecute(status);
             if (status == TEXT_ERROR) {
-                DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_ERROR);
-                mPagesAdapter.notifyItemChanged(mPageIndex);
+                DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(Document.STATE_ERROR);
+                documentsAdapter.notifyItemChanged(docIndex);
             } else if (status == TEXT_OK) {
-                TranslateTask translateTask = new TranslateTask(mPageIndex, mFromLang, mToLang);
+                TranslateTask translateTask = new TranslateTask(docIndex, fromLang, toLang);
                 translateTask.execute();
             }
         }
@@ -395,21 +392,21 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
 
     public class TranslateTask extends AsyncTask<Void, Void, Void> {
 
-        private int mPageIndex;
-        private String mFromLang;
-        private String mToLang;
+        private int docIndex;
+        private String fromLang;
+        private String toLang;
 
         public TranslateTask(int index, String fromLang, String toLang) {
-            mPageIndex = index;
-            mFromLang = fromLang;
-            mToLang = toLang;
+            docIndex = index;
+            this.fromLang = fromLang;
+            this.toLang = toLang;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            DocumentHolder.getInstance().setPageState(mPageIndex, Page.STATE_TRANSLATING);
-            mPagesAdapter.notifyItemChanged(mPageIndex);
+            DocumentsHolder.getInstance().setDocumentState(docIndex, Document.STATE_TRANSLATING);
+            documentsAdapter.notifyItemChanged(docIndex);
         }
 
         @Override
@@ -420,9 +417,9 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     .appendPath("V2")
                     .appendPath("Http.svc")
                     .appendPath("Translate")
-                    .appendQueryParameter("text", DocumentHolder.getInstance().getPage(mPageIndex).getOriginal())
-                    .appendQueryParameter("from", mFromLang)
-                    .appendQueryParameter("to", mToLang);
+                    .appendQueryParameter("text", DocumentsHolder.getInstance().getDocumentAt(docIndex).getText())
+                    .appendQueryParameter("from", fromLang)
+                    .appendQueryParameter("to", toLang);
 
             String urlString = builder.build().toString();
             URL url = null;
@@ -446,8 +443,8 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
                     int responseCode = connection.getResponseCode();
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
                         String fullResult = streamToString(connection.getInputStream(), 10000);
-                        fullResult = fullResult.substring(68, fullResult.length() - 9);
-                        DocumentHolder.getInstance().getPage(mPageIndex).setTranslationTextAndBlocks(fullResult);
+                        String translation = fullResult.substring(68, fullResult.length() - 9);
+                        DocumentsHolder.getInstance().getDocumentAt(docIndex).setTranslation(translation);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -459,13 +456,12 @@ public class MainActivity extends AppCompatActivity implements PagesRecyclerView
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            DocumentHolder.getInstance().getPage(mPageIndex).setState(Page.STATE_FINISHED);
-            mPagesAdapter.notifyItemChanged(mPageIndex);
+            DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(Document.STATE_FINISHED);
+            documentsAdapter.notifyItemChanged(docIndex);
         }
 
         public String streamToString(InputStream stream, int maxReadSize) throws IOException {
-            Reader reader = null;
-            reader = new InputStreamReader(stream, "UTF-8");
+            Reader reader = new InputStreamReader(stream, "UTF-8");
             char[] rawBuffer = new char[maxReadSize];
             int readSize;
             StringBuffer buffer = new StringBuffer();
