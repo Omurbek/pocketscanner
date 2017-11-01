@@ -64,7 +64,7 @@ public class DocumentFinder {
             Imgproc.approxPolyDP(maxContour2f, maxContour2f, mDeviation * perimeter, mClosed);
 
             if (maxContour2f.size().height == 4) {
-                documentCorners = getOrderedPoints(maxContour2f);
+                documentCorners = getListOfPoints(maxContour2f);
             }
         }
 
@@ -79,10 +79,9 @@ public class DocumentFinder {
         return documentCorners;
     }
 
-    private ArrayList<Point> getOrderedPoints(MatOfPoint2f contourPoints) {
+    private ArrayList<Point> getListOfPoints(MatOfPoint2f contourPoints) {
         List<org.opencv.core.Point> points = contourPoints.toList();
         ArrayList<Point> pts = new ArrayList<>();
-        int i = 0;
         for (org.opencv.core.Point point : points) {
             pts.add(new Point((int) point.x, (int) point.y));
         }
