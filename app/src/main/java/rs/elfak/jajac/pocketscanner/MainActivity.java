@@ -437,7 +437,8 @@ public class MainActivity extends AppCompatActivity implements
                     connection.setConnectTimeout(3000);
                     connection.setRequestMethod("GET");
                     connection.setDoInput(true);
-                    connection.setRequestProperty("Ocp-Apim-Subscription-Key", "13b8ffca8e9e4ffabbf4c9e3947b5145");
+                    connection.setRequestProperty("Ocp-Apim-Subscription-Key",
+                            getString(R.string.microsoft_translator_api_key));
                     connection.connect();
 
                     int responseCode = connection.getResponseCode();
