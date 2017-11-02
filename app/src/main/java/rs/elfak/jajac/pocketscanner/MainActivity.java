@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 2;
-    private static final int REQUEST_CHOOSE_FROM_GALLERY = 3;
+    private static final int REQUEST_LOCATION_PERMISSION = 3;
+    private static final int REQUEST_CHOOSE_FROM_GALLERY = 4;
 
     private LinearLayout exploreBtn;
     private LinearLayout cameraBtn;
@@ -200,8 +201,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void onExploreClicked() {
-        Intent intent = new Intent(MainActivity.this, MapActivity.class);
-        startActivity(intent);
+        String locationPerm = Manifest.permission.ACCESS_FINE_LOCATION;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                checkSelfPermission(locationPerm) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{locationPerm}, REQUEST_LOCATION_PERMISSION);
+        } else {
+            openMap();
+        }
     }
 
     private void onCameraClicked() {
@@ -253,6 +259,14 @@ public class MainActivity extends AppCompatActivity implements
                 } else {
                     Toast.makeText(this, "Need storage permission.", Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case REQUEST_LOCATION_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openMap();
+                } else {
+                    Toast.makeText(this, "Need location permission.", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
@@ -266,6 +280,11 @@ public class MainActivity extends AppCompatActivity implements
         Intent galleryIntent = new Intent(Intent.ACTION_PICK);
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, REQUEST_CHOOSE_FROM_GALLERY);
+    }
+
+    private void openMap() {
+        Intent intent = new Intent(MainActivity.this, MapActivity.class);
+        startActivity(intent);
     }
 
     @Override
