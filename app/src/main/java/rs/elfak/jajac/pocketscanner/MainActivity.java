@@ -340,8 +340,8 @@ public class MainActivity extends AppCompatActivity implements
         private String fromLang;
         private String toLang;
 
-        public DetectTextAndTranslateTask(int index, String fromLang, String toLang) {
-            docIndex = index;
+        public DetectTextAndTranslateTask(int docIndex, String fromLang, String toLang) {
+            this.docIndex = docIndex;
             this.fromLang = fromLang;
             this.toLang = toLang;
         }
@@ -359,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements
             try {
                 if (!textRecognizer.isOperational()) {
                     Toast.makeText(MainActivity.this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+                    return TEXT_ERROR;
                 }
 
                 Bitmap bitmap = DocumentsHolder.getInstance().getDocumentBitmap(docIndex);

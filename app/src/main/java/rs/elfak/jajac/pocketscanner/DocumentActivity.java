@@ -94,8 +94,11 @@ public class DocumentActivity extends AppCompatActivity {
 
     private void onSubmitClicked() {
         int daysRelevant = getDaysRelevant();
+        DocumentType docType = getDocumentType();
+
         Document doc = DocumentsHolder.getInstance().getDocumentAt(documentIndex);
         doc.setDaysRelevant(daysRelevant);
+        doc.setType(docType);
 
         String newDocumentKey = documentsDb.push().getKey();
         documentsDb.child(newDocumentKey).setValue(doc).addOnSuccessListener(aVoid -> {
@@ -114,6 +117,14 @@ public class DocumentActivity extends AppCompatActivity {
         RadioButton radioButton = submitDialog.findViewById(checkedResId);
 
         return Integer.valueOf((String) radioButton.getTag());
+    }
+
+    private DocumentType getDocumentType() {
+        RadioGroup radioGroup = submitDialog.findViewById(R.id.dialog_type_radio_group);
+        int checkedResId = radioGroup.getCheckedRadioButtonId();
+        RadioButton radioButton = submitDialog.findViewById(checkedResId);
+
+        return DocumentType.values()[(int) radioButton.getTag()];
     }
 
 }

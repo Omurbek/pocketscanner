@@ -59,14 +59,6 @@ public class Document {
         return location;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public int getDaysRelevant() {
-        return daysRelevant;
-    }
-
     public void setDaysRelevant(int daysRelevant) {
         this.daysRelevant = daysRelevant;
     }
