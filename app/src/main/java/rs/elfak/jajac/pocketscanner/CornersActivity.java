@@ -65,7 +65,7 @@ public class CornersActivity extends AppCompatActivity {
         backBtn.setOnClickListener(view -> onBack());
         finishBtn.setOnClickListener(view -> onFinish());
 
-        documentFinder = new DocumentFinder(9, 0.02, true, 10.0, 20.0, 3);
+        documentFinder = new DocumentFinder(9, 10.0, 20.0, 3, 0.02, true);
         documentsHolder = DocumentsHolder.getInstance();
         bitmap = documentsHolder.getLastDocumentBitmap();
 
@@ -195,51 +195,10 @@ public class CornersActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(Void... voids) {
-            Point topLeft = corners.get(0);
-            Point topRight = corners.get(1);
-            Point bottomRight = corners.get(2);
-            Point bottomLeft = corners.get(3);
-
-            int maxWidth = (int) Math.max(
-                    Math.sqrt(Math.pow(topRight.x - topLeft.x, 2) + Math.pow(topRight.y - topLeft.y, 2)),
-                    Math.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2) + Math.pow(bottomRight.y - bottomLeft.y, 2))
-            );
-
-            int maxHeight = (int) Math.max(
-                    Math.sqrt(Math.pow(topLeft.x - bottomLeft.x, 2) + Math.pow(topLeft.y - bottomLeft.y, 2)),
-                    Math.sqrt(Math.pow(topRight.x - bottomRight.x, 2) + Math.pow(topRight.y - bottomRight.y, 2))
-            );
-
-            List<Point> transformedCorners = new ArrayList<>();
-            transformedCorners.add(new Point(0, 0));
-            transformedCorners.add(new Point(maxWidth - 1, 0));
-            transformedCorners.add(new Point(maxWidth - 1, maxHeight - 1));
-            transformedCorners.add(new Point(0, maxHeight - 1));
-
-            Mat imageMat = new Mat();
-            Mat grayMat = new Mat();
-            Mat imageRect = getMatOfPoints(corners);
-            Mat transformRect = getMatOfPoints(transformedCorners);
-            Utils.bitmapToMat(image, imageMat);
-
-            Mat transformMat = Imgproc.getPerspectiveTransform(imageRect, transformRect);
-            Imgproc.warpPerspective(imageMat, imageMat, transformMat, new Size(maxWidth, maxHeight));
-
-            Imgproc.cvtColor(imageMat, grayMat, Imgproc.COLOR_RGBA2GRAY);
-            Imgproc.threshold(grayMat, grayMat, 0, 255, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
-
-            image = Bitmap.createBitmap(imageMat.width(), imageMat.height(), image.getConfig());
-
-            Utils.matToBitmap(grayMat, image);
-
-            imageRect.release();
-            transformRect.release();
-            transformMat.release();
-            imageMat.release();
-            grayMat.release();
-
-            DocumentsHolder.getInstance().setLastDocumentBitmap(image);
-            return image;
+            DocumentExtractor docExtractor = new DocumentExtractor(image, corners);
+            Bitmap extractedDoc = docExtractor.extract();
+            DocumentsHolder.getInstance().setLastDocumentBitmap(extractedDoc);
+            return extractedDoc;
         }
 
         @Override
@@ -248,16 +207,6 @@ public class CornersActivity extends AppCompatActivity {
             isProcessed = true;
             cornersView.setVisibility(View.INVISIBLE);
             imageView.setImageBitmap(bitmap);
-        }
-
-        private MatOfPoint2f getMatOfPoints(List<Point> points) {
-            List<org.opencv.core.Point> opencvPoints = new ArrayList<>();
-            for (Point point : points) {
-                opencvPoints.add(new org.opencv.core.Point(point.x, point.y));
-            }
-            MatOfPoint2f mat = new MatOfPoint2f();
-            mat.fromList(opencvPoints);
-            return mat;
         }
     }
 }

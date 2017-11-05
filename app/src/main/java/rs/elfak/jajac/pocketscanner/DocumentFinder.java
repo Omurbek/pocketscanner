@@ -33,14 +33,14 @@ public class DocumentFinder {
     private List<MatOfPoint> contourPoints = new ArrayList<>();
     private MatOfPoint2f maxContour2f = new MatOfPoint2f();
 
-    public DocumentFinder(int blurSize, double deviation, boolean closed,
-                          double cannyLow, double cannyHigh, int sobelSize) {
+    public DocumentFinder(int blurSize, double cannyLow, double cannyHigh,
+                          int sobelSize, double deviation, boolean closed) {
         this.blurSize = blurSize;
-        this.deviation = deviation;
-        this.closed = closed;
         this.cannyLow = cannyLow;
         this.cannyHigh = cannyHigh;
         this.sobelSize = sobelSize;
+        this.deviation = deviation;
+        this.closed = closed;
     }
 
     public List<Point> findCorners(Bitmap bitmap) {
@@ -108,9 +108,9 @@ public class DocumentFinder {
         contours.clear();
     }
 
-    private ArrayList<Point> getListOfPoints(MatOfPoint2f contourPoints) {
+    private List<Point> getListOfPoints(MatOfPoint2f contourPoints) {
         List<org.opencv.core.Point> points = contourPoints.toList();
-        ArrayList<Point> pts = new ArrayList<>();
+        List<Point> pts = new ArrayList<>();
         for (org.opencv.core.Point point : points) {
             pts.add(new Point((int) point.x, (int) point.y));
         }
