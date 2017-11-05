@@ -149,8 +149,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void onNewLocation(Location location) {
-        LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
-        GeoLocation geoLoc = new GeoLocation(location.getLatitude(), location.getLongitude());
+        LatLng center = new LatLng(location.getLat(), location.getLon());
+        GeoLocation geoLoc = new GeoLocation(location.getLat(), location.getLon());
         if (userLocation == null) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 15.0f));
             circle = googleMap.addCircle(new CircleOptions()
@@ -186,8 +186,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void addDocumentMarker(String key, Document doc) {
-        double docLatitude = doc.getLocation().getLatitude();
-        double docLongitude = doc.getLocation().getLongitude();
+        double docLatitude = doc.getLocation().getLat();
+        double docLongitude = doc.getLocation().getLon();
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(new LatLng(docLatitude, docLongitude));
         float markerColor = BitmapDescriptorFactory.HUE_AZURE;

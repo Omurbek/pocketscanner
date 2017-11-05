@@ -51,7 +51,7 @@ class DocumentsHolder {
         return getLastDocument().getBitmap();
     }
 
-    public void setDocumentState(int index, int state) {
+    public void setDocumentState(int index, DocumentState state) {
         documents.get(index).setState(state);
     }
 

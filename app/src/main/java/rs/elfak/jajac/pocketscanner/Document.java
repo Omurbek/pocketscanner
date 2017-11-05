@@ -4,18 +4,9 @@ import android.graphics.Bitmap;
 
 import com.google.firebase.database.Exclude;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Document {
 
-    public static final int STATE_ERROR = -1;
-    public static final int STATE_PENDING = 0;
-    public static final int STATE_DETECTING_TEXT = 1;
-    public static final int STATE_TRANSLATING = 2;
-    public static final int STATE_FINISHED = 3;
-
-    private int state = STATE_PENDING;
+    private DocumentState state = DocumentState.PENDING;
 
     private Bitmap bitmap;
 
@@ -38,12 +29,12 @@ public class Document {
     }
 
     @Exclude
-    public int getState() {
+    public DocumentState getState() {
         return state;
     }
 
-    public void setState(int mState) {
-        this.state = mState;
+    public void setState(DocumentState state) {
+        this.state = state;
     }
 
     @Exclude
@@ -51,12 +42,20 @@ public class Document {
         return bitmap;
     }
 
-    public void setBitmap(Bitmap mBitmap) {
-        this.bitmap = mBitmap;
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     public Location getLocation() {
         return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public int getDaysRelevant() {
+        return this.daysRelevant;
     }
 
     public void setDaysRelevant(int daysRelevant) {

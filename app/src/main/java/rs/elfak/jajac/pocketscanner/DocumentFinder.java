@@ -18,36 +18,41 @@ public class DocumentFinder {
 
     private static final String TAG = "DocumentFinder";
 
-    private double mDeviation;
-    private boolean mClosed;
-    private int mBlur;
+    private double deviation;
+    private boolean closed;
+    private int blurSize;
+    private double cannyLow;
+    private double cannyHigh;
+    private int sobelSize;
 
-    public DocumentFinder(int blur, double deviation, boolean closed) {
-        mDeviation = deviation;
-        mClosed = closed;
-        mBlur = blur;
+    private Mat image;
+    private Mat blurred;
+    private Mat gray;
+    private Mat edges;
+    private Mat hierarchy;
+    private List<MatOfPoint> contourPoints = new ArrayList<>();
+    private MatOfPoint2f maxContour2f = new MatOfPoint2f();
+
+    public DocumentFinder(int blurSize, double deviation, boolean closed,
+                          double cannyLow, double cannyHigh, int sobelSize) {
+        this.blurSize = blurSize;
+        this.deviation = deviation;
+        this.closed = closed;
+        this.cannyLow = cannyLow;
+        this.cannyHigh = cannyHigh;
+        this.sobelSize = sobelSize;
     }
 
     public List<Point> findCorners(Bitmap bitmap) {
-        List<Point> documentCorners = new ArrayList<>();
-        documentCorners.add(new Point(0, 0));
-        documentCorners.add(new Point(bitmap.getWidth(), 0));
-        documentCorners.add(new Point(bitmap.getWidth(), bitmap.getHeight()));
-        documentCorners.add(new Point(0, bitmap.getHeight()));
+        // Initially set corners to image corners themselves
+        List<Point> documentCorners = getDefaultCorners(bitmap.getHeight(), bitmap.getWidth());
 
-        Mat image = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC4);
-        Mat blurred = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC4);
-        Mat gray = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC1);
-        Mat edges = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC1);
-        Mat hierarchy = new Mat();
-        List<MatOfPoint> contourPoints = new ArrayList<>();
-        MatOfPoint2f maxContour2f = new MatOfPoint2f();
-
+        initMatrices(bitmap.getHeight(), bitmap.getWidth());
         Utils.bitmapToMat(bitmap, image);
 
-        Imgproc.medianBlur(image, blurred, mBlur);
+        Imgproc.medianBlur(image, blurred, blurSize);
         Imgproc.cvtColor(blurred, gray, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.Canny(gray, edges, 10, 20, 3, false);
+        Imgproc.Canny(gray, edges, cannyLow, cannyHigh, sobelSize, false);
         Imgproc.findContours(edges, contourPoints, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         if (contourPoints.size() != 0) {
@@ -59,15 +64,36 @@ public class DocumentFinder {
             });
 
             contourPoints.get(0).convertTo(maxContour2f, CvType.CV_32F);
-
-            double perimeter = Imgproc.arcLength(maxContour2f, mClosed);
-            Imgproc.approxPolyDP(maxContour2f, maxContour2f, mDeviation * perimeter, mClosed);
+            double perimeter = Imgproc.arcLength(maxContour2f, closed);
+            Imgproc.approxPolyDP(maxContour2f, maxContour2f, deviation * perimeter, closed);
 
             if (maxContour2f.size().height == 4) {
                 documentCorners = getListOfPoints(maxContour2f);
             }
         }
 
+        releaseMatrices();
+        return documentCorners;
+    }
+
+    private List<Point> getDefaultCorners(int height, int width) {
+        List<Point> defaultCorners = new ArrayList<>();
+        defaultCorners.add(new Point(0, 0));
+        defaultCorners.add(new Point(width, 0));
+        defaultCorners.add(new Point(width, height));
+        defaultCorners.add(new Point(0, height));
+        return defaultCorners;
+    }
+
+    private void initMatrices(int height, int width) {
+        image = new Mat(height, width, CvType.CV_8UC4);
+        blurred = new Mat(height, width, CvType.CV_8UC4);
+        gray = new Mat(height, width, CvType.CV_8UC1);
+        edges = new Mat(height, width, CvType.CV_8UC1);
+        hierarchy = new Mat();
+    }
+
+    private void releaseMatrices() {
         image.release();
         blurred.release();
         gray.release();
@@ -75,8 +101,11 @@ public class DocumentFinder {
         hierarchy.release();
         releaseContourList(contourPoints);
         maxContour2f.release();
+    }
 
-        return documentCorners;
+    private void releaseContourList(List<MatOfPoint> contours) {
+        contours.forEach(MatOfPoint::release);
+        contours.clear();
     }
 
     private ArrayList<Point> getListOfPoints(MatOfPoint2f contourPoints) {
@@ -86,13 +115,6 @@ public class DocumentFinder {
             pts.add(new Point((int) point.x, (int) point.y));
         }
         return pts;
-    }
-
-    private void releaseContourList(List<MatOfPoint> contours) {
-        for (MatOfPoint contour : contours) {
-            contour.release();
-        }
-        contours.clear();
     }
 
 }

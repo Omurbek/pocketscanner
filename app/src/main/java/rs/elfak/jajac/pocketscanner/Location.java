@@ -2,24 +2,24 @@ package rs.elfak.jajac.pocketscanner;
 
 public class Location {
 
-    private double latitude;
-    private double longitude;
+    private double lat;
+    private double lon;
 
     public Location() {
 
     }
 
-    public Location(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public Location(double lat, double lon) {
+        this.lat = lat;
+        this.lon = lon;
     }
 
-    public double getLatitude() {
-        return this.latitude;
+    public double getLat() {
+        return this.lat;
     }
 
-    public double getLongitude() {
-        return this.longitude;
+    public double getLon() {
+        return this.lon;
     }
 
 }

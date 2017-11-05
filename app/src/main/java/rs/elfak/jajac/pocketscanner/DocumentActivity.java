@@ -102,7 +102,7 @@ public class DocumentActivity extends AppCompatActivity {
 
         String newDocumentKey = documentsDb.push().getKey();
         documentsDb.child(newDocumentKey).setValue(doc).addOnSuccessListener(aVoid -> {
-            GeoLocation geoLoc = new GeoLocation(doc.getLocation().getLatitude(), doc.getLocation().getLongitude());
+            GeoLocation geoLoc = new GeoLocation(doc.getLocation().getLat(), doc.getLocation().getLon());
             documentsGeoFire.setLocation(newDocumentKey, geoLoc, (key, error) -> {
                 Toast.makeText(DocumentActivity.this, "Document shared!", Toast.LENGTH_SHORT).show();
             });
@@ -124,7 +124,7 @@ public class DocumentActivity extends AppCompatActivity {
         int checkedResId = radioGroup.getCheckedRadioButtonId();
         RadioButton radioButton = submitDialog.findViewById(checkedResId);
 
-        return DocumentType.values()[(int) radioButton.getTag()];
+        return DocumentType.values()[Integer.valueOf((String) radioButton.getTag())];
     }
 
 }

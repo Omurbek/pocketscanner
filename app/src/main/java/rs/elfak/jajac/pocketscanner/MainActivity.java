@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements
         String fromLangVal = langValues[languageFromSpinner.getSelectedItemPosition()];
         String toLangVal = langValues[languageToSpinner.getSelectedItemPosition()];
         for (int i = 0; i < docHolder.getDocumentCount(); i++) {
-            if (docHolder.getDocumentAt(i).getState() != Document.STATE_FINISHED) {
+            if (docHolder.getDocumentAt(i).getState() != DocumentState.FINISHED) {
                 new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
             }
         }
@@ -216,14 +216,12 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         String cameraPerm = Manifest.permission.CAMERA;
-        String writeStoragePerm = Manifest.permission.WRITE_EXTERNAL_STORAGE;
         String locationPerm = Manifest.permission.ACCESS_FINE_LOCATION;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 (checkSelfPermission(cameraPerm) != PackageManager.PERMISSION_GRANTED ||
-                 checkSelfPermission(writeStoragePerm) != PackageManager.PERMISSION_GRANTED ||
                  checkSelfPermission(locationPerm) != PackageManager.PERMISSION_GRANTED))
         {
-            ActivityCompat.requestPermissions(this, new String[]{cameraPerm, writeStoragePerm, locationPerm},
+            ActivityCompat.requestPermissions(this, new String[]{cameraPerm, locationPerm},
                     REQUEST_CAMERA_PERMISSION);
         } else {
             onUseCamera();
@@ -349,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            DocumentsHolder.getInstance().setDocumentState(docIndex, Document.STATE_DETECTING_TEXT);
+            DocumentsHolder.getInstance().setDocumentState(docIndex, DocumentState.FINDING_TEXT);
             documentsAdapter.notifyItemChanged(docIndex);
         }
 
@@ -401,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(Integer status) {
             super.onPostExecute(status);
             if (status == TEXT_ERROR) {
-                DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(Document.STATE_ERROR);
+                DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(DocumentState.NO_TEXT);
                 documentsAdapter.notifyItemChanged(docIndex);
             } else if (status == TEXT_OK) {
                 TranslateTask translateTask = new TranslateTask(docIndex, fromLang, toLang);
@@ -425,7 +423,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            DocumentsHolder.getInstance().setDocumentState(docIndex, Document.STATE_TRANSLATING);
+            DocumentsHolder.getInstance().setDocumentState(docIndex, DocumentState.TRANSLATING);
             documentsAdapter.notifyItemChanged(docIndex);
         }
 
@@ -477,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(Document.STATE_FINISHED);
+            DocumentsHolder.getInstance().getDocumentAt(docIndex).setState(DocumentState.FINISHED);
             documentsAdapter.notifyItemChanged(docIndex);
         }
 

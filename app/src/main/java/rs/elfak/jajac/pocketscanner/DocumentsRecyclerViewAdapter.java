@@ -62,23 +62,23 @@ public class DocumentsRecyclerViewAdapter extends RecyclerView.Adapter<Documents
         holder.mImgView.setImageBitmap(smallBitmap);
 
         switch (doc.getState()) {
-            case Document.STATE_ERROR:
+            case NO_TEXT:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_error_text));
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
                 break;
-            case Document.STATE_PENDING:
+            case PENDING:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_pending_text));
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
                 break;
-            case Document.STATE_DETECTING_TEXT:
+            case FINDING_TEXT:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_detecting_text));
                 holder.mProgressBar.setVisibility(View.VISIBLE);
                 break;
-            case Document.STATE_TRANSLATING:
+            case TRANSLATING:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_translating_text));
                 holder.mProgressBar.setVisibility(View.VISIBLE);
                 break;
-            case Document.STATE_FINISHED:
+            case FINISHED:
                 holder.mStatusText.setText(mContext.getString(R.string.page_item_finished_text));
                 holder.mProgressBar.setVisibility(View.INVISIBLE);
                 break;
