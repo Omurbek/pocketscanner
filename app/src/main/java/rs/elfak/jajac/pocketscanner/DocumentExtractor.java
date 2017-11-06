@@ -35,45 +35,54 @@ public class DocumentExtractor {
         Point bottomRight = corners.get(2);
         Point bottomLeft = corners.get(3);
 
-        int maxWidth = (int) Math.max(
-                Math.sqrt(Math.pow(topRight.x - topLeft.x, 2) + Math.pow(topRight.y - topLeft.y, 2)),
-                Math.sqrt(Math.pow(bottomRight.x - bottomLeft.x, 2) + Math.pow(bottomRight.y - bottomLeft.y, 2))
-        );
+        int maxWidth = getBiggerDistance(topRight, topLeft, bottomRight, bottomLeft);
+        int maxHeight = getBiggerDistance(topLeft, bottomLeft, topRight, bottomRight);
 
-        int maxHeight = (int) Math.max(
-                Math.sqrt(Math.pow(topLeft.x - bottomLeft.x, 2) + Math.pow(topLeft.y - bottomLeft.y, 2)),
-                Math.sqrt(Math.pow(topRight.x - bottomRight.x, 2) + Math.pow(topRight.y - bottomRight.y, 2))
-        );
+        List<Point> transformedCorners = getTransformedCorners(maxWidth, maxHeight);
+        initMatrices(bitmap.getHeight(), bitmap.getWidth(), transformedCorners);
+        transform = Imgproc.getPerspectiveTransform(imageRect, transformedRect);
 
+        Utils.bitmapToMat(bitmap, image);
+        Imgproc.warpPerspective(image, image, transform, new Size(maxWidth, maxHeight));
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_RGBA2GRAY);
+        Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_OTSU);
+
+        bitmap = Bitmap.createBitmap(image.width(), image.height(), bitmap.getConfig());
+        Utils.matToBitmap(gray, bitmap);
+
+        releaseMatrices();
+        transform.release();
+        return bitmap;
+    }
+
+    private int getBiggerDistance(Point p11, Point p12, Point p21, Point p22) {
+        return (int) Math.max(
+                Math.sqrt(Math.pow(p11.x - p12.x, 2) + Math.pow(p11.y - p12.y, 2)),
+                Math.sqrt(Math.pow(p21.x - p22.x, 2) + Math.pow(p21.y - p22.y, 2))
+        );
+    }
+
+    private List<Point> getTransformedCorners(int maxWidth, int maxHeight) {
         List<Point> transformedCorners = new ArrayList<>();
         transformedCorners.add(new Point(0, 0));
         transformedCorners.add(new Point(maxWidth - 1, 0));
         transformedCorners.add(new Point(maxWidth - 1, maxHeight - 1));
         transformedCorners.add(new Point(0, maxHeight - 1));
+        return transformedCorners;
+    }
 
-        image = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC4);
-        gray = new Mat(bitmap.getHeight(), bitmap.getWidth(), CvType.CV_8UC1);
+    private void initMatrices(int height, int width, List<Point> transformedCorners) {
+        image = new Mat(height, width, CvType.CV_8UC4);
+        gray = new Mat(height, width, CvType.CV_8UC1);
         imageRect = getMatOfPoints(corners);
         transformedRect = getMatOfPoints(transformedCorners);
-        Utils.bitmapToMat(bitmap, image);
+    }
 
-        transform = Imgproc.getPerspectiveTransform(imageRect, transformedRect);
-        Imgproc.warpPerspective(image, image, transform, new Size(maxWidth, maxHeight));
-
-        Imgproc.cvtColor(image, gray, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.threshold(gray, gray, 0, 255, Imgproc.THRESH_OTSU);
-
-        bitmap = Bitmap.createBitmap(image.width(), image.height(), bitmap.getConfig());
-
-        Utils.matToBitmap(gray, bitmap);
-
+    private void releaseMatrices() {
         imageRect.release();
         transformedRect.release();
-        transform.release();
         image.release();
         gray.release();
-
-        return bitmap;
     }
 
     private MatOfPoint2f getMatOfPoints(List<Point> points) {

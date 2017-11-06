@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements
         String toLangVal = langValues[languageToSpinner.getSelectedItemPosition()];
         for (int i = 0; i < docHolder.getDocumentCount(); i++) {
             if (docHolder.getDocumentAt(i).getState() != DocumentState.FINISHED) {
-                new DetectTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
+                new RecognizeTextAndTranslateTask(i, fromLangVal, toLangVal).execute();
             }
         }
     }
@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public class DetectTextAndTranslateTask extends AsyncTask<Void, Void, Integer> {
+    public class RecognizeTextAndTranslateTask extends AsyncTask<Void, Void, Integer> {
 
         public static final int TEXT_ERROR = 0;
         public static final int TEXT_OK = 1;
@@ -338,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements
         private String fromLang;
         private String toLang;
 
-        public DetectTextAndTranslateTask(int docIndex, String fromLang, String toLang) {
+        public RecognizeTextAndTranslateTask(int docIndex, String fromLang, String toLang) {
             this.docIndex = docIndex;
             this.fromLang = fromLang;
             this.toLang = toLang;
@@ -363,7 +363,6 @@ public class MainActivity extends AppCompatActivity implements
                 Bitmap bitmap = DocumentsHolder.getInstance().getDocumentBitmap(docIndex);
                 Frame frame = new Frame.Builder().setBitmap(bitmap).build();
                 SparseArray<TextBlock> detectedBlocks = textRecognizer.detect(frame);
-
                 List<TextBlock> textBlocks = new ArrayList<>();
                 for (int i = 0; i < detectedBlocks.size(); i++) {
                     textBlocks.add(detectedBlocks.valueAt(i));
@@ -373,26 +372,32 @@ public class MainActivity extends AppCompatActivity implements
                     return TEXT_ERROR;
                 }
 
-                // sort blocks top-to-bottom, left-to-right
-                Collections.sort(textBlocks, (left, right) -> {
-                    int verticalDiff = left.getBoundingBox().top - right.getBoundingBox().top;
-                    int horizontalDiff = left.getBoundingBox().left - right.getBoundingBox().left;
-                    if (verticalDiff != 0) {
-                        return verticalDiff;
-                    }
-                    return horizontalDiff;
-                });
-
-                String detectedText = "";
-                for (TextBlock tb : textBlocks) {
-                    detectedText += tb.getValue() + "\n\n";
-                }
-
+                sortBlocksByPosition(textBlocks); // top to bottom, left to right
+                String detectedText = buildStringResult(textBlocks);
                 DocumentsHolder.getInstance().setDocumentText(docIndex, detectedText);
                 return TEXT_OK;
             } finally {
                 textRecognizer.release();
             }
+        }
+
+        private void sortBlocksByPosition(List<TextBlock> textBlocks) {
+            Collections.sort(textBlocks, (left, right) -> {
+                int verticalDiff = left.getBoundingBox().top - right.getBoundingBox().top;
+                int horizontalDiff = left.getBoundingBox().left - right.getBoundingBox().left;
+                if (verticalDiff != 0) {
+                    return verticalDiff;
+                }
+                return horizontalDiff;
+            });
+        }
+
+        private String buildStringResult(List<TextBlock> textBlocks) {
+            String detectedText = "";
+            for (TextBlock tb : textBlocks) {
+                detectedText += tb.getValue() + "\n\n";
+            }
+            return detectedText;
         }
 
         @Override
